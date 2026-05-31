@@ -7,7 +7,12 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-export const NavDock: React.FC = () => {
+interface NavDockProps {
+  activeSection: string;
+  onSelect: (id: string) => void;
+}
+
+export const NavDock: React.FC<NavDockProps> = ({ activeSection, onSelect }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isDockHovered, setIsDockHovered] = useState<boolean>(false);
 
@@ -53,13 +58,19 @@ export const NavDock: React.FC = () => {
         <div className="nd-items-stack">
           {navItems.map((item) => {
             const isItemHovered = hoveredItem === item.id;
+            const isItemActive = activeSection === item.id;
+
             return (
               <div
                 key={item.id}
-                className={`nd-item-row ${isItemHovered ? 'nd-row-hovered' : ''}`}
+                className={`nd-item-row ${isItemHovered ? 'nd-row-hovered' : ''} ${isItemActive ? 'nd-row-active' : ''}`}
                 onMouseEnter={() => setHoveredItem(item.id)}
                 onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => onSelect(item.id)}
               >
+                {/* Active Indicator Pillar */}
+                <div className="nd-active-indicator" />
+
                 <div className="nd-capsule-container">
                   <div className="nd-glow-layer" />
                   <div className="nd-icon-fluid">
@@ -67,7 +78,7 @@ export const NavDock: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Premium Hardware Tooltip */}
+                {/* Hardware Tooltip */}
                 <div className="nd-tooltip">
                   <span className="nd-tooltip-text">{item.label}</span>
                 </div>

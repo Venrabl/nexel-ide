@@ -205,3 +205,36 @@
   background-color: rgba(155, 170, 255, 0.6);
   transform: scale(1.1);
 }
+
+/* --- ACTIVE STATE INDICATOR PILL --- */
+.nd-active-indicator {
+  position: absolute;
+  left: -2px; /* Tucked slightly into the left edge margins */
+  width: 3px;
+  height: 0px;
+  border-radius: 99px;
+  background: #c084fc; /* Vibrant purple indicator */
+  box-shadow: 0 0 10px #c084fc, 0 0 20px rgba(192, 132, 252, 0.4);
+  opacity: 0;
+  transition: 
+    height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.25s ease;
+  z-index: 5;
+}
+
+/* Base Active State Layout */
+.nd-row-active .nd-active-indicator {
+  height: 16px; /* Spawns a nice, sharp dynamic micro-bar */
+  opacity: 1;
+}
+
+/* Subtle persistence highlight when an item is active but not explicitly hovered */
+.nd-row-active .nd-icon-fluid {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Adjust active bar sizing when the dock itself swells open */
+.nd-dock-expanded .nd-row-active .nd-active-indicator {
+  height: 24px;
+  left: 2px;
+}
