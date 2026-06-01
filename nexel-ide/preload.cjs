@@ -10,4 +10,20 @@ contextBridge.exposeInMainWorld('nexelAPI', {
   // Workspace File System triggers
   openWorkspaceDir: () => ipcRenderer.invoke('fs:open-dir'),
   readWorkspaceFiles: (dirPath) => ipcRenderer.invoke('fs:read-files', dirPath),
+  createFile: (parentPath, fileName) => ipcRenderer.invoke('fs:create-file', parentPath, fileName),
+  createFolder: (parentPath, folderName) => ipcRenderer.invoke('fs:create-folder', parentPath, folderName),
+  renameNode: (oldPath, newPath) => ipcRenderer.invoke('fs:rename', oldPath, newPath),
+  deleteNode: (targetPath) => ipcRenderer.invoke('fs:delete', targetPath),
+  readFileContent: (filePath) => ipcRenderer.invoke('fs:read-file-content', filePath),
+  writeFileContent: (filePath, content) => ipcRenderer.invoke('fs:write-file-content', filePath, content),
+
+  // Terminal PTY integration
+  createTerminal: () => ipcRenderer.invoke('terminal:create'),
+  writeTerminal: (data) => ipcRenderer.send('terminal:write', data),
+  resizeTerminal: (cols, rows) => ipcRenderer.send('terminal:resize', cols, rows),
+  onTerminalData: (callback) => {
+    // Clear previous listeners to avoid double listener leaks
+    ipcRenderer.removeAllListeners('terminal:data');
+    ipcRenderer.on('terminal:data', (event, data) => callback(data));
+  }
 });

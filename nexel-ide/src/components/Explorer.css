@@ -1,42 +1,63 @@
-/* --- PREMIUM HARMONIZED SIDEBAR CORE --- */
+/* --- COLLAPSIBLE SIDEBAR CONTAINER (Standard solid collapse) --- */
+.nx-sidebar-container {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.nx-sidebar-container.collapsed {
+  width: 0px !important;
+  min-width: 0px !important;
+  transform: translateX(-260px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- COLLAPSIBLE NAVDOCK CONTAINER (Hover reveal pop-out) --- */
+.nx-navdock-wrapper-container {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.nx-navdock-wrapper-container.collapsed {
+  transform: translateX(-80px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nx-navdock-wrapper-container.collapsed.hover-revealed {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+/* --- PREMIUM MINIMAL MONOCHROME WORKSPACE EXPLORER --- */
 .nx-explorer-wrapper {
-  width: 250px;
+  width: 260px;
   height: 100vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   user-select: none;
-  
-  /* Blends smoothly out from behind the NavDock area layout positioning */
-  background: linear-gradient(90deg, rgba(13, 14, 18, 0.4) 0%, rgba(11, 11, 13, 0) 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.015);
-  padding-left: 64px; /* Flawlessly clears the NavDock axis footprint */
+  background: #0B0B0D;
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  padding-left: 72px;
   z-index: 10;
-  
-  /* Premium pop-out cinematic entry animation anchor */
-  animation: nx-panel-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  transform-origin: left center;
 }
 
-@keyframes nx-panel-reveal {
-  from {
-    opacity: 0;
-    width: 0px;
-    transform: scaleX(0.95);
-  }
-  to {
-    opacity: 1;
-    width: 250px;
-    transform: scaleX(1);
-  }
-}
-
-/* Header Text Track Customization */
+/* Header Text Track with Action Buttons Row */
 .nx-explorer-header {
-  height: 52px;
+  height: 48px;
   display: flex;
   align-items: center;
-  padding-left: 12px;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .nx-explorer-title {
@@ -44,8 +65,231 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  transition: color 0.15s ease;
+}
+
+.nx-explorer-title:hover {
+  color: #ffffff;
+}
+
+/* Tool belt container matching your photo query reference */
+.nx-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nx-action-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: rgba(255, 255, 255, 0.25);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.nx-action-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-action-btn:disabled {
+  opacity: 0.15;
+  cursor: not-allowed;
+}
+
+.nx-action-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Real-time Workspace Search / Filter belt */
+.nx-search-belt {
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-search-input-frame {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  padding: 1px 4px;
+  transition: border-color 0.15s;
+}
+
+.nx-search-input-frame:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nx-search-textbox {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 3px;
+}
+
+.nx-search-toggles {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.nx-search-tog-btn {
+  background: transparent;
+  border: none;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.2);
+  padding: 1px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.nx-search-tog-btn:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.nx-search-tog-btn.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Bookmarks Pinned Shelf */
+.nx-pinned-shelf {
+  padding: 8px 12px 4px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 4px;
+}
+
+.nx-shelf-title svg {
+  width: 8px;
+  height: 8px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.nx-shelf-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nx-shelf-item {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
+}
+
+.nx-shelf-item:hover {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.02);
+}
+
+.nx-shelf-item.active {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.nx-shelf-icon-frame {
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.nx-shelf-text {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+
+.nx-shelf-item:hover .nx-shelf-text {
+  color: #ffffff;
+}
+
+.nx-shelf-unpin-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  position: absolute;
+  right: 4px;
+}
+
+.nx-shelf-item:hover .nx-shelf-unpin-btn {
+  opacity: 1;
+}
+
+/* Inner Fallback UX state for blank launches */
+.nx-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60%;
+  width: 100%;
+}
+
+.nx-open-prompt-btn {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.nx-open-prompt-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Scroll Container Layer */
@@ -53,43 +297,39 @@
   flex-grow: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 24px;
+  padding: 6px 0 20px 0;
 }
 
-/* Compact Tree Rows Definition */
+/* Drag and Drop feedback highlights */
+.nx-node-row.nx-drag-over {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tree Rows Definition */
 .nx-node-row {
   display: flex;
   align-items: center;
-  height: 22px; /* Tight, precise cyber spacing footprint */
-  margin: 1px 8px 1px 0;
+  height: 22px; 
+  margin: 1px 6px;
   border-radius: 4px;
   cursor: pointer;
   position: relative;
-  transition: 
-    background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.2s ease;
+  border: 1px solid transparent;
+  transition: background-color 0.1s, border-color 0.1s;
 }
 
 .nx-node-row:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(255, 255, 255, 0.025);
 }
 
-/* --- STATE: ACTIVE/SELECTED COMPONENT GLOW (Matches NavDock) --- */
+/* Selected File Row Overlay State */
 .nx-row-selected {
-  background: linear-gradient(90deg, rgba(192, 132, 252, 0.06) 0%, rgba(192, 132, 252, 0.01) 100%) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Inner neon outline flare mirroring the image reference */
-.nx-row-selected::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(192, 132, 252, 0.12);
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-/* Micro Chevron Configuration */
+/* Chevron and Icon sizes */
 .nx-chevron {
   display: inline-flex;
   align-items: center;
@@ -98,13 +338,12 @@
   height: 12px;
   margin-right: 4px;
   color: rgba(255, 255, 255, 0.15);
-  transform: rotate(0deg);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
 }
 
 .nx-chevron.open {
   transform: rotate(90deg);
-  color: rgba(192, 132, 252, 0.6); /* Highlights fold paths with active purple tone */
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .nx-chevron svg {
@@ -116,7 +355,6 @@
   width: 16px;
 }
 
-/* Icon Structural Framing */
 .nx-icon-frame {
   display: inline-flex;
   align-items: center;
@@ -124,25 +362,42 @@
   width: 14px;
   height: 14px;
   margin-right: 6px;
-  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.25);
 }
 
-.nx-icon-frame svg {
+.nx-svg-icon {
   width: 12px;
   height: 12px;
+  border-radius: 1px;
 }
 
-/* Label Typography formatting */
+.nx-svg-icon.folder {
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.15s;
+}
+
+.nx-svg-icon.folder.open {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Search Highlights */
+.nx-node-text.nx-search-match {
+  color: #ffffff !important;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Typography formatting */
 .nx-node-text {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 11.5px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.45);
-  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s ease;
+  flex-grow: 1;
 }
 
 .nx-node-row:hover .nx-node-text {
@@ -152,16 +407,179 @@
 .nx-row-selected .nx-node-text {
   color: #ffffff;
   font-weight: 500;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-/* Structural Layout grouping indentation line triggers */
+.nx-file-ext {
+  color: rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+}
+
+.nx-node-row:hover .nx-file-ext {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nx-file-ext.active {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Hover Quick Actions overlay inside row */
+.nx-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  position: absolute;
+  right: 4px;
+  background: #0B0B0D;
+  padding-left: 8px;
+}
+
+.nx-node-row:hover .nx-row-actions {
+  opacity: 1;
+}
+
+.nx-row-act-btn {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nx-row-act-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nx-row-act-btn svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Nested Children */
 .nx-nested-children {
   display: flex;
   flex-direction: column;
 }
 
-/* Performance Scrollbar Config */
+/* Inline form styling */
+.nx-inline-input-form {
+  margin: 2px 6px;
+  width: 100%;
+}
+
+.nx-inline-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.nx-inline-input-wrapper::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 99px;
+}
+
+.nx-inline-textbox {
+  width: 90%;
+  background: #121214;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: -apple-system, sans-serif;
+  font-size: 11.5px;
+  padding: 3px 8px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.nx-inline-textbox:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: #161619;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+/* Floating custom glass context menu */
+.nx-custom-context-menu {
+  position: fixed;
+  background: rgba(13, 13, 16, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border-radius: 10px;
+  padding: 5px 0;
+  width: 160px;
+  z-index: 10000;
+  animation: nx-fade-in-up 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nx-fade-in-up {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.nx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  margin: 0 4px;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+}
+
+.nx-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.nx-menu-item.delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.nx-menu-item.delete:hover svg {
+  color: #ef4444;
+}
+
+.nx-menu-item svg {
+  width: 12px;
+  height: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.12s ease;
+}
+
+.nx-menu-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  margin: 4px 0;
+}
+
+/* Sleek Scrollbar */
 .nx-tree-scroll::-webkit-scrollbar {
   width: 3px;
 }
@@ -171,4 +589,7 @@
 .nx-tree-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 99px;
+}
+.nx-tree-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.1);
 }

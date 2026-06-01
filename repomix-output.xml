@@ -47,19 +47,30 @@ docs/roadmap.md
 nexel-ide/.gitignore
 nexel-ide/eslint.config.js
 nexel-ide/index.html
+nexel-ide/logo.png
 nexel-ide/main.cjs
 nexel-ide/package.json
 nexel-ide/preload.cjs
 nexel-ide/public/favicon.svg
 nexel-ide/public/icons.svg
+nexel-ide/public/logo.png
 nexel-ide/README.md
 nexel-ide/src/App.css
 nexel-ide/src/App.tsx
 nexel-ide/src/assets/hero.png
+nexel-ide/src/assets/logo.png
 nexel-ide/src/assets/react.svg
 nexel-ide/src/assets/vite.svg
+nexel-ide/src/components/Editor.css
+nexel-ide/src/components/Editor.tsx
+nexel-ide/src/components/Explorer.css
+nexel-ide/src/components/Explorer.tsx
 nexel-ide/src/components/NavDock.css
 nexel-ide/src/components/NavDock.tsx
+nexel-ide/src/components/Terminal.css
+nexel-ide/src/components/Terminal.tsx
+nexel-ide/src/components/TitleBar.css
+nexel-ide/src/components/TitleBar.tsx
 nexel-ide/src/index.css
 nexel-ide/src/main.tsx
 nexel-ide/src/nexel-env.d.ts
@@ -72,6 +83,1429 @@ README.md
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="nexel-ide/src/components/Editor.css">
+/* --- PREMIUM MINIMAL MONOCHROME MONACO EDITOR CANVAS --- */
+.nx-editor-canvas {
+  flex-grow: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #050507;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Floating aesthetic minimal active tabs bar container */
+.nx-floating-tabbar-container {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none; /* Let clicks pass through outside the bar */
+}
+
+.nx-floating-tabbar {
+  pointer-events: auto; /* Re-enable clicks inside the bar */
+  display: flex;
+  align-items: center;
+  background: rgba(13, 13, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 4px 8px;
+  height: 38px;
+  box-sizing: border-box;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  max-width: 90%;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-floating-tabbar:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(10, 10, 12, 0.92);
+}
+
+.nx-tabs-scroll-stack {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 500px;
+}
+
+.nx-tabs-scroll-stack::-webkit-scrollbar {
+  display: none; /* Hide scrollbars inside floating bar */
+}
+
+/* Minimalist floating tab styling */
+.nx-editor-tab {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  min-width: 80px;
+  max-width: 140px;
+}
+
+.nx-editor-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nx-editor-tab.active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.nx-tab-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+.nx-editor-tab.active .nx-tab-title {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Tab Close button */
+.nx-tab-close-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.nx-tab-close-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Unsaved dirty indicator */
+.nx-dirty-indicator-glow {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 6px;
+}
+
+/* Toolbar global controls inside floating bar */
+.nx-editor-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 8px;
+  margin-left: 4px;
+}
+
+.nx-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nx-toolbar-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-toolbar-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.nx-toolbar-btn.auto-save.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nx-auto-save-led {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.2s;
+}
+
+.nx-toolbar-btn.auto-save.active .nx-auto-save-led {
+  background: #ffffff;
+}
+
+/* Monaco Workspace Wrapper Panel */
+.nx-editor-workspace-area {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  background: #050507;
+  padding-top: 56px; /* Offsets Monaco scroll under the floating bar perfectly */
+  box-sizing: border-box;
+}
+
+/* Welcome Backdrop style */
+.nx-editor-welcome-backdrop {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050507;
+}
+
+.nx-welcome-glass-plate {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 400px;
+}
+
+.nx-welcome-branding-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nx-welcome-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  display: block;
+}
+
+.nx-welcome-headline {
+  position: absolute;
+  bottom: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  letter-spacing: 0.35em;
+  color: #ffffff;
+  margin: 0;
+  text-indent: 0.35em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.nx-welcome-subtitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0 0 28px 0;
+}
+
+.nx-shortcut-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.nx-shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: -apple-system, sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-shortcut-row kbd {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+/* Footer Metrics styling */
+.nx-editor-footer-metrics {
+  height: 22px;
+  background: #0B0B0D;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-family: -apple-system, sans-serif;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.3);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.nx-footer-path {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
+}
+
+.nx-footer-right-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nx-footer-metric-pill {
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.nx-footer-metric-pill.active {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Minimalist floating tab dropdown action menu */
+.nx-tab-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+
+.nx-tab-menu-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.nx-tab-menu-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-tab-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: rgba(13, 13, 16, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 15px rgba(255, 255, 255, 0.02);
+  width: 130px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: nx-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-dropdown-item {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.nx-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  padding-left: 14px;
+}
+
+.nx-dropdown-item.warning {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-dropdown-item.warning:hover {
+  color: #ff6e6e;
+  background: rgba(255, 110, 110, 0.05);
+}
+</file>
+
+<file path="nexel-ide/src/components/Editor.tsx">
+import React, { useState, useEffect, useRef } from 'react';
+import MonacoEditor, { loader } from '@monaco-editor/react';
+import './Editor.css';
+import logoImg from '../assets/logo.png';
+
+interface EditorTab {
+  filePath: string;
+  name: string;
+  content: string;
+  originalContent: string; // Used to track dirty status
+  isDirty: boolean;
+}
+
+interface EditorProps {
+  activeFilePath: string | null;
+  onFileSelect: (filePath: string) => void;
+  onCloseFile?: (filePath: string) => void;
+}
+
+export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, onCloseFile }) => {
+  const [tabs, setTabs] = useState<EditorTab[]>([]);
+  const [activeTabPath, setActiveTabPath] = useState<string | null>(null);
+  const [autoSave, setAutoSave] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState<boolean>(false);
+  
+  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const editorRef = useRef<any>(null);
+
+  const closeAllTabs = () => {
+    setShowMenu(false);
+    const hasDirty = tabs.some(t => t.isDirty);
+    if (hasDirty) {
+      const confirmClose = window.confirm("Some tabs have unsaved changes. Close all anyway?");
+      if (!confirmClose) return;
+    }
+    setTabs([]);
+    setActiveTabPath(null);
+    if (onCloseFile) onCloseFile("");
+  };
+
+  const closeSavedTabs = () => {
+    setShowMenu(false);
+    const remaining = tabs.filter(t => t.isDirty);
+    setTabs(remaining);
+    if (remaining.length > 0) {
+      if (!remaining.some(t => t.filePath === activeTabPath)) {
+        const nextActive = remaining[remaining.length - 1].filePath;
+        setActiveTabPath(nextActive);
+        onFileSelect(nextActive);
+      }
+    } else {
+      setActiveTabPath(null);
+      if (onCloseFile) onCloseFile("");
+    }
+  };
+
+  // Sync with activeFilePath from props
+  useEffect(() => {
+    if (!activeFilePath) return;
+
+    const loadFile = async () => {
+      // Check if already open
+      const existingTab = tabs.find(t => t.filePath === activeFilePath);
+      if (existingTab) {
+        setActiveTabPath(activeFilePath);
+        return;
+      }
+
+      // Load new file content physically
+      try {
+        const content = await window.nexelAPI.readFileContent(activeFilePath);
+        const name = activeFilePath.split('/').pop() || activeFilePath;
+        const newTab: EditorTab = {
+          filePath: activeFilePath,
+          name,
+          content,
+          originalContent: content,
+          isDirty: false
+        };
+        setTabs(prev => [...prev, newTab]);
+        setActiveTabPath(activeFilePath);
+      } catch (err) {
+        console.error("Failed to read selected file:", err);
+      }
+    };
+
+    loadFile();
+  }, [activeFilePath]);
+
+  // Handle Ctrl+S and keybinds
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveActiveTab();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
+        e.preventDefault();
+        if (activeTabPath) closeTab(activeTabPath);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [tabs, activeTabPath]);
+
+  // Handle Auto-Save loop
+  useEffect(() => {
+    if (autoSave) {
+      autoSaveIntervalRef.current = setInterval(() => {
+        saveAllDirtyTabs();
+      }, 5000); // Check and save every 5 seconds
+    } else {
+      if (autoSaveIntervalRef.current) clearInterval(autoSaveIntervalRef.current);
+    }
+
+    return () => {
+      if (autoSaveIntervalRef.current) clearInterval(autoSaveIntervalRef.current);
+    };
+  }, [autoSave, tabs]);
+
+  // Auto-scroll active tab into view when selected
+  useEffect(() => {
+    if (!activeTabPath) return;
+    const timer = setTimeout(() => {
+      const activeTabEl = document.querySelector('.nx-editor-tab.active');
+      if (activeTabEl) {
+        activeTabEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [activeTabPath]);
+
+  const saveActiveTab = async () => {
+    const activeTab = tabs.find(t => t.filePath === activeTabPath);
+    if (!activeTab || !activeTab.isDirty) return;
+
+    try {
+      await window.nexelAPI.writeFileContent(activeTab.filePath, activeTab.content);
+      setTabs(prev => prev.map(t => 
+        t.filePath === activeTabPath 
+          ? { ...t, originalContent: t.content, isDirty: false }
+          : t
+      ));
+    } catch (err) {
+      console.error("Failed to save active file:", err);
+    }
+  };
+
+  const saveAllDirtyTabs = async () => {
+    const dirtyTabs = tabs.filter(t => t.isDirty);
+    for (const tab of dirtyTabs) {
+      try {
+        await window.nexelAPI.writeFileContent(tab.filePath, tab.content);
+        setTabs(prev => prev.map(t => 
+          t.filePath === tab.filePath 
+            ? { ...t, originalContent: t.content, isDirty: false }
+            : t
+        ));
+      } catch (err) {
+        console.error("Auto-save write operation failed:", err);
+      }
+    }
+  };
+
+  const handleEditorChange = (value: string | undefined) => {
+    const updatedValue = value || '';
+    setTabs(prev => prev.map(t => 
+      t.filePath === activeTabPath 
+        ? { ...t, content: updatedValue, isDirty: updatedValue !== t.originalContent }
+        : t
+    ));
+  };
+
+  const closeTab = (path: string) => {
+    const tabToClose = tabs.find(t => t.filePath === path);
+    if (tabToClose?.isDirty) {
+      const confirmClose = window.confirm(`File "${tabToClose.name}" has unsaved changes. Close anyway?`);
+      if (!confirmClose) return;
+    }
+
+    const remainingTabs = tabs.filter(t => t.filePath !== path);
+    setTabs(remainingTabs);
+
+    if (onCloseFile) onCloseFile(path);
+
+    if (activeTabPath === path) {
+      if (remainingTabs.length > 0) {
+        const nextActive = remainingTabs[remainingTabs.length - 1].filePath;
+        setActiveTabPath(nextActive);
+        onFileSelect(nextActive);
+      } else {
+        setActiveTabPath(null);
+      }
+    }
+  };
+
+  const getLanguage = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'ts':
+      case 'tsx':
+        return 'typescript';
+      case 'js':
+      case 'jsx':
+        return 'javascript';
+      case 'html':
+        return 'html';
+      case 'css':
+        return 'css';
+      case 'json':
+        return 'json';
+      case 'md':
+        return 'markdown';
+      case 'cpp':
+      case 'c':
+      case 'h':
+        return 'cpp';
+      case 'py':
+        return 'python';
+      default:
+        return 'plaintext';
+    }
+  };
+
+  // Define Custom Premium Monaco Theme
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
+
+    monaco.editor.defineTheme('nexel-minimal-dark', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: 'comment', foreground: '6D727C', fontStyle: 'italic' },
+        { token: 'keyword', foreground: 'C5A3A3', fontStyle: 'bold' }, // Muted grayish red/pink
+        { token: 'string', foreground: 'B0C4DE' }, // Muted grayish blue
+        { token: 'number', foreground: 'D3C1A5' }, // Muted grayish gold
+        { token: 'regexp', foreground: 'C5B0C5' }, // Muted grayish purple
+        { token: 'type', foreground: 'A3C5B5', fontStyle: 'bold' }, // Muted grayish teal/green
+        { token: 'class', foreground: 'D5D6D8', fontStyle: 'bold' }, // Muted off-white
+        { token: 'function', foreground: 'D4C2AD' }, // Muted grayish peach/orange
+        { token: 'variable', foreground: 'E2E3E5' },
+        { token: 'identifier', foreground: 'E2E3E5' },
+      ],
+      colors: {
+        'editor.background': '#050507',
+        'editor.foreground': '#E2E3E5',
+        'editorCursor.foreground': '#FFFFFF',
+        'editor.lineHighlightBackground': '#0F0F12',
+        'editorLineNumber.foreground': '#303035',
+        'editorLineNumber.activeForeground': '#FFFFFF',
+        'editor.selectionBackground': '#252528',
+        'editorWidget.background': '#0D0D10',
+        'editorWidget.border': '#202025',
+      }
+    });
+
+    monaco.editor.setTheme('nexel-minimal-dark');
+  };
+
+  const activeTab = tabs.find(t => t.filePath === activeTabPath);
+
+  const getStats = () => {
+    if (!activeTab) return { lines: 0, chars: 0 };
+    return {
+      lines: activeTab.content.split('\n').length,
+      chars: activeTab.content.length
+    };
+  };
+
+  return (
+    <div className="nx-editor-canvas">
+      {/* Floating Premium aesthetic minimal active tabs bar */}
+      {tabs.length > 0 && (
+        <div className="nx-floating-tabbar-container">
+          <div className="nx-floating-tabbar">
+            <div className="nx-tabs-scroll-stack">
+              {tabs.map((tab) => (
+                <div 
+                  key={tab.filePath} 
+                  className={`nx-editor-tab ${activeTabPath === tab.filePath ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTabPath(tab.filePath);
+                    onFileSelect(tab.filePath);
+                  }}
+                >
+                  <span className="nx-tab-title">{tab.name}</span>
+                  {tab.isDirty && <div className="nx-dirty-indicator-glow" />}
+                  <button 
+                    className="nx-tab-close-btn" 
+                    title="Close Tab"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeTab(tab.filePath);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Minimalist Tab Actions Menu Dropdown */}
+            <div className="nx-tab-menu-container">
+              <button 
+                className="nx-tab-menu-btn" 
+                title="Tab Actions"
+                onClick={() => setShowMenu(!showMenu)}
+              >
+                •••
+              </button>
+              {showMenu && (
+                <div className="nx-tab-dropdown-menu">
+                  <div className="nx-dropdown-item" onClick={saveAllDirtyTabs}>
+                    Save All Tabs
+                  </div>
+                  <div className="nx-dropdown-item" onClick={closeAllTabs}>
+                    Close All Tabs
+                  </div>
+                  <div className="nx-dropdown-item warning" onClick={closeSavedTabs}>
+                    Close Saved Tabs
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Global Toolbar actions inside floating bar */}
+            {activeTabPath && (
+              <div className="nx-editor-toolbar-actions">
+                <button 
+                  className={`nx-toolbar-btn auto-save ${autoSave ? 'active' : ''}`}
+                  onClick={() => setAutoSave(!autoSave)}
+                  title={autoSave ? "Disable Auto-Save" : "Enable Auto-Save"}
+                >
+                  <div className="nx-auto-save-led" />
+                  Auto-Save
+                </button>
+                
+                <button 
+                  className="nx-toolbar-btn save" 
+                  onClick={saveActiveTab}
+                  disabled={!activeTab?.isDirty}
+                  title="Save changes (Ctrl+S)"
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Monaco Code Editor Area */}
+      {activeTab ? (
+        <div className="nx-editor-workspace-area">
+          <MonacoEditor
+            height="100%"
+            language={getLanguage(activeTab.name)}
+            value={activeTab.content}
+            onChange={handleEditorChange}
+            onMount={handleEditorDidMount}
+            options={{
+              fontSize: 13,
+              fontFamily: 'Consolas, "Courier New", Courier, monospace',
+              minimap: { enabled: false },
+              scrollbar: {
+                vertical: 'visible',
+                horizontal: 'visible',
+                verticalScrollbarSize: 8,
+                horizontalScrollbarSize: 8,
+              },
+              lineNumbersMinChars: 3,
+              automaticLayout: true,
+              cursorBlinking: 'smooth',
+              cursorSmoothCaretAnimation: 'on',
+              padding: { top: 16 },
+              tabSize: 2,
+            }}
+          />
+        </div>
+      ) : (
+        <div className="nx-editor-welcome-backdrop">
+          <div className="nx-welcome-glass-plate">
+            <div className="nx-welcome-branding-wrapper">
+              <img src={logoImg} className="nx-welcome-logo" alt="Nexel IDE Logo" />
+              <h1 className="nx-welcome-headline">NEXEL IDE</h1>
+            </div>
+            <p className="nx-welcome-subtitle">A premium minimal workspace with native Monaco integration.</p>
+            <div className="nx-shortcut-box">
+              <div className="nx-shortcut-row"><span>Open Workspace Folder</span> <kbd>Click Explorer Header</kbd></div>
+              <div className="nx-shortcut-row"><span>Create New File</span> <kbd>Right Click in Sidebar</kbd></div>
+              <div className="nx-shortcut-row"><span>Save Working Changes</span> <kbd>Ctrl + S</kbd></div>
+              <div className="nx-shortcut-row"><span>Close Active Tab</span> <kbd>Ctrl + W</kbd></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status metrics footer */}
+      {activeTab && (
+        <div className="nx-editor-footer-metrics">
+          <span className="nx-footer-path">{activeTab.filePath}</span>
+          <div className="nx-footer-right-cluster">
+            <span className="nx-footer-metric-pill">Monaco Editor</span>
+            <span className="nx-footer-metric-pill">UTF-8</span>
+            <span className="nx-footer-metric-pill">Lines: {getStats().lines}</span>
+            <span className="nx-footer-metric-pill">Chars: {getStats().chars}</span>
+            <span className="nx-footer-metric-pill active">Nexel Engine</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Editor;
+</file>
+
+<file path="nexel-ide/src/components/Terminal.css">
+.nx-terminal-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  height: 280px;
+  background: rgba(11, 11, 13, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  z-index: 9999;
+  box-sizing: border-box;
+  animation: nx-term-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  padding: 0;
+  -webkit-app-region: no-drag;
+  /* Smooth transition for left sliding when explorer collapses/expands */
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Margin and hover revelations below custom title bar offsets */
+.nx-sidebar-container,
+.nx-navdock-wrapper-container,
+.nx-navdock-hover-trigger {
+  /* Prevent dock/sidebar overlaying on top of bottom terminal when expanded */
+  height: calc(100vh - 34px) !important;
+}
+
+@keyframes nx-term-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.nx-terminal-header {
+  height: 32px;
+  min-height: 32px;
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+}
+
+.nx-term-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nx-term-icon {
+  width: 12px;
+  height: 12px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nx-term-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nx-term-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.nx-term-header-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 3px;
+  border-radius: 4px;
+  transition: all 0.12s ease;
+}
+
+.nx-term-header-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.nx-term-header-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nx-term-header-btn.close:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444 !important;
+}
+
+.nx-terminal-body {
+  flex-grow: 1;
+  background: #0B0B0D; /* Sleek obsidian matches layout */
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Customize xterm inner canvas styles safely */
+.xterm-viewport::-webkit-scrollbar {
+  width: 4px;
+}
+
+.xterm-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 99px;
+}
+
+.xterm-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+</file>
+
+<file path="nexel-ide/src/components/Terminal.tsx">
+import React, { useEffect, useRef } from 'react';
+import { Terminal as XTerm } from 'xterm';
+import { FitAddon } from 'xterm-addon-fit';
+import 'xterm/css/xterm.css';
+import './Terminal.css';
+
+interface TerminalProps {
+  visible: boolean;
+  onClose: () => void;
+  sidebarCollapsed: boolean;
+}
+
+export const Terminal: React.FC<TerminalProps> = ({ visible, onClose, sidebarCollapsed }) => {
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const xtermInstance = useRef<XTerm | null>(null);
+  const fitAddonInstance = useRef<FitAddon | null>(null);
+
+  useEffect(() => {
+    if (!visible || !terminalRef.current) return;
+
+    // Initialize xterm with custom visual theme matching Monaco minimally
+    const term = new XTerm({
+      cursorBlink: true,
+      cursorStyle: 'underline',
+      fontSize: 12,
+      fontFamily: 'Consolas, "Courier New", monospace',
+      theme: {
+        background: '#0B0B0D', // Match editor background exactly
+        foreground: '#e2e3e5', // Light gray text
+        cursor: '#ffffff',
+        selectionBackground: 'rgba(255, 255, 255, 0.1)',
+        black: '#000000',
+        red: '#C5A3A3', // Muted red keyword tone
+        green: '#A3C5B5', // Muted green type tone
+        yellow: '#D3C1A5', // Muted gold number tone
+        blue: '#B0C4DE', // Muted blue string tone
+        magenta: '#D4C2AD', // Muted peach function tone
+        cyan: '#8c95a5',
+        white: '#ffffff',
+      },
+      allowProposedApi: true
+    });
+
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(terminalRef.current);
+    
+    // Fit terminal layout to container
+    setTimeout(() => {
+      try {
+        fitAddon.fit();
+        window.nexelAPI.resizeTerminal(term.cols, term.rows);
+      } catch (err) {}
+    }, 100);
+
+    xtermInstance.current = term;
+    fitAddonInstance.current = fitAddon;
+
+    let isNative = false;
+    let commandInputBuffer = '';
+
+    // Spawn native shell process in main
+    window.nexelAPI.createTerminal().then((nativeActive) => {
+      isNative = nativeActive;
+    });
+
+    // Listen to data from shell -> write to terminal
+    window.nexelAPI.onTerminalData((data: string) => {
+      term.write(data);
+    });
+
+    // Write terminal key inputs -> shell process stdin
+    const onDataDisposable = term.onData((data) => {
+      if (isNative) {
+        window.nexelAPI.writeTerminal(data);
+      } else {
+        // Fallback TTY emulation: manual echo + standard input stream pipe
+        for (let i = 0; i < data.length; i++) {
+          const char = data[i];
+          
+          if (char === '\r') {
+            term.write('\r\n');
+            window.nexelAPI.writeTerminal(commandInputBuffer + '\r\n');
+            commandInputBuffer = '';
+          } else if (char === '\u007F' || char === '\b') {
+            if (commandInputBuffer.length > 0) {
+              commandInputBuffer = commandInputBuffer.slice(0, -1);
+              term.write('\b \b');
+            }
+          } else if (char.charCodeAt(0) >= 32 && char.charCodeAt(0) <= 126) {
+            commandInputBuffer += char;
+            term.write(char);
+          } else {
+            // Forward other characters (arrows, tab, ctrl+c, etc.) directly
+            window.nexelAPI.writeTerminal(char);
+          }
+        }
+      }
+    });
+
+    // Handle resize on observer updates
+    const resizeObserver = new ResizeObserver(() => {
+      try {
+        fitAddon.fit();
+        window.nexelAPI.resizeTerminal(term.cols, term.rows);
+      } catch (err) {}
+    });
+    if (terminalRef.current) {
+      resizeObserver.observe(terminalRef.current);
+    }
+
+    return () => {
+      onDataDisposable.dispose();
+      term.dispose();
+      xtermInstance.current = null;
+      fitAddonInstance.current = null;
+      resizeObserver.disconnect();
+    };
+  }, [visible]);
+
+  if (!visible) return null;
+
+  return (
+    <div 
+      className="nx-terminal-panel"
+      style={{ left: sidebarCollapsed ? '0px' : '260px' }}
+    >
+      <div className="nx-terminal-header">
+        <div className="nx-term-header-left">
+          <svg className="nx-term-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" />
+          </svg>
+          <span className="nx-term-title">TERMINAL</span>
+        </div>
+        <div className="nx-term-header-right">
+          <button className="nx-term-header-btn close" onClick={onClose} title="Close Terminal Panel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div className="nx-terminal-body" ref={terminalRef} />
+    </div>
+  );
+};
+</file>
+
+<file path="nexel-ide/src/components/TitleBar.css">
+.nx-titlebar-container {
+  height: 34px;
+  min-height: 34px;
+  background: #08080a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  user-select: none;
+  box-sizing: border-box;
+  z-index: 99999;
+}
+
+/* Invisible overlay drag region so dragging works anywhere except interactive components */
+.nx-titlebar-drag-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-app-region: drag;
+  z-index: -1;
+}
+
+.nx-titlebar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 12px;
+  z-index: 10;
+  -webkit-app-region: no-drag;
+}
+
+.nx-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+.nx-logo-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  margin-right: 4px;
+}
+
+.nx-brand-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+}
+
+.nx-menu-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nx-menu-trigger-container {
+  position: relative;
+}
+
+.nx-menu-trigger-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.nx-menu-trigger-btn:hover,
+.nx-menu-trigger-btn.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Glassmorphism Titlebar dropdown */
+.nx-titlebar-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: rgba(13, 13, 16, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  min-width: 140px;
+  padding: 4px 0;
+  z-index: 100000;
+  animation: nx-titlebar-fade 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nx-titlebar-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nx-titlebar-dropdown-item {
+  padding: 6px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  margin: 0 4px;
+  border-radius: 5px;
+  transition: all 0.1s ease;
+}
+
+.nx-titlebar-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.nx-titlebar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.nx-window-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.nx-titlebar-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  z-index: 10;
+  -webkit-app-region: no-drag;
+}
+
+.nx-win-ctrl-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  height: 34px;
+  width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nx-win-ctrl-btn svg {
+  width: 10px;
+  height: 10px;
+}
+
+.nx-win-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.nx-win-ctrl-btn.close:hover {
+  background: #e81123 !important;
+  color: #ffffff !important;
+}
+</file>
+
+<file path="nexel-ide/src/components/TitleBar.tsx">
+import React, { useState, useEffect, useRef } from 'react';
+import logoImg from '../assets/logo.png';
+import './TitleBar.css';
+
+export const TitleBar: React.FC = () => {
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setActiveMenu(null);
+      }
+    };
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleControl = (action: 'minimize' | 'maximize' | 'close') => {
+    if (action === 'minimize') window.nexelAPI.minimizeWindow();
+    else if (action === 'maximize') window.nexelAPI.maximizeWindow();
+    else if (action === 'close') window.nexelAPI.closeWindow();
+  };
+
+  const triggerOpenFolder = () => {
+    setActiveMenu(null);
+    window.dispatchEvent(new CustomEvent('nx-open-folder'));
+  };
+
+  const menus = {
+    File: [
+      { label: 'Open Folder...', action: triggerOpenFolder },
+      { label: 'New File', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-new-file')); } },
+      { label: 'New Folder', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-new-folder')); } },
+    ],
+    Edit: [
+      { label: 'Undo', action: () => {} },
+      { label: 'Redo', action: () => {} },
+      { label: 'Cut', action: () => {} },
+      { label: 'Copy', action: () => {} },
+      { label: 'Paste', action: () => {} },
+    ],
+    Selection: [
+      { label: 'Select All', action: () => {} },
+      { label: 'Expand Selection', action: () => {} },
+    ],
+    View: [
+      { label: 'Toggle Sidebar', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-toggle-sidebar')); } },
+      { label: 'Appearance', action: () => {} },
+    ],
+    Terminal: [
+      { label: 'New Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-terminal')); } },
+      { label: 'Toggle Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-toggle-terminal')); } },
+    ],
+    Help: [
+      { label: 'About Nexel IDE', action: () => alert('Nexel IDE v1.0.0 - Built with React + TypeScript + Monaco') },
+    ]
+  };
+
+  return (
+    <div className="nx-titlebar-container">
+      {/* Draggable drag region */}
+      <div className="nx-titlebar-drag-handle" />
+
+      <div className="nx-titlebar-left" ref={menuRef}>
+        <div className="nx-brand-logo">
+          <img src={logoImg} className="nx-logo-img" alt="Nexel Logo" />
+          <span className="nx-brand-text">NEXEL</span>
+        </div>
+
+        <div className="nx-menu-bar">
+          {Object.entries(menus).map(([name, items]) => {
+            const isOpen = activeMenu === name;
+            return (
+              <div key={name} className="nx-menu-trigger-container">
+                <button
+                  className={`nx-menu-trigger-btn ${isOpen ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveMenu(isOpen ? null : name);
+                  }}
+                  onMouseEnter={() => {
+                    if (activeMenu !== null) setActiveMenu(name);
+                  }}
+                >
+                  {name}
+                </button>
+
+                {isOpen && (
+                  <div className="nx-titlebar-dropdown">
+                    {items.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="nx-titlebar-dropdown-item"
+                        onClick={() => {
+                          if (item.action) item.action();
+                        }}
+                      >
+                        {item.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="nx-titlebar-center">
+        <span className="nx-window-title">NEXEL IDE — Workspace</span>
+      </div>
+
+      <div className="nx-titlebar-right">
+        <button 
+          className="nx-win-ctrl-btn minimize" 
+          title="Minimize" 
+          onClick={() => handleControl('minimize')}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+        </button>
+        <button 
+          className="nx-win-ctrl-btn maximize" 
+          title="Maximize" 
+          onClick={() => handleControl('maximize')}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /></svg>
+        </button>
+        <button 
+          className="nx-win-ctrl-btn close" 
+          title="Close" 
+          onClick={() => handleControl('close')}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+</file>
 
 <file path=".gitignore">
 # Logs
@@ -336,6 +1770,22 @@ contextBridge.exposeInMainWorld('nexelAPI', {
   // Workspace File System triggers
   openWorkspaceDir: () => ipcRenderer.invoke('fs:open-dir'),
   readWorkspaceFiles: (dirPath) => ipcRenderer.invoke('fs:read-files', dirPath),
+  createFile: (parentPath, fileName) => ipcRenderer.invoke('fs:create-file', parentPath, fileName),
+  createFolder: (parentPath, folderName) => ipcRenderer.invoke('fs:create-folder', parentPath, folderName),
+  renameNode: (oldPath, newPath) => ipcRenderer.invoke('fs:rename', oldPath, newPath),
+  deleteNode: (targetPath) => ipcRenderer.invoke('fs:delete', targetPath),
+  readFileContent: (filePath) => ipcRenderer.invoke('fs:read-file-content', filePath),
+  writeFileContent: (filePath, content) => ipcRenderer.invoke('fs:write-file-content', filePath, content),
+
+  // Terminal PTY integration
+  createTerminal: () => ipcRenderer.invoke('terminal:create'),
+  writeTerminal: (data) => ipcRenderer.send('terminal:write', data),
+  resizeTerminal: (cols, rows) => ipcRenderer.send('terminal:resize', cols, rows),
+  onTerminalData: (callback) => {
+    // Clear previous listeners to avoid double listener leaks
+    ipcRenderer.removeAllListeners('terminal:data');
+    ipcRenderer.on('terminal:data', (event, data) => callback(data));
+  }
 });
 </file>
 
@@ -641,463 +2091,1394 @@ export default defineConfig([
 <svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
 </file>
 
-<file path="nexel-ide/src/components/NavDock.css">
-/* Central alignment axis - ensures left & right expansion are perfectly symmetrical */
-.nd-wrapper-axis {
-  position: fixed;
-  left: 12px; /* Tightly tucked into the absolute left boundary edge */
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 64px; /* Matches the maximum expanded width perfectly to keep things locked */
-  z-index: 9999;
-  background: transparent;
-  box-sizing: border-box;
+<file path="nexel-ide/src/components/Explorer.css">
+/* --- COLLAPSIBLE SIDEBAR CONTAINER (Standard solid collapse) --- */
+.nx-sidebar-container {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+              width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-/* --- STATE 1: IDLE (Subtly larger baseline width) --- */
-.nd-dock {
+.nx-sidebar-container.collapsed {
+  width: 0px !important;
+  min-width: 0px !important;
+  transform: translateX(-260px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- COLLAPSIBLE NAVDOCK CONTAINER (Hover reveal pop-out) --- */
+.nx-navdock-wrapper-container {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.nx-navdock-wrapper-container.collapsed {
+  transform: translateX(-80px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nx-navdock-wrapper-container.collapsed.hover-revealed {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+/* --- PREMIUM MINIMAL MONOCHROME WORKSPACE EXPLORER --- */
+.nx-explorer-wrapper {
+  width: 260px;
+  height: 100vh;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  user-select: none;
+  background: #0B0B0D;
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  padding-left: 72px;
+  z-index: 10;
+}
+
+/* Header Text Track with Action Buttons Row */
+.nx-explorer-header {
+  height: 48px;
+  display: flex;
   align-items: center;
-  width: 42px; /* Slightly punchier baseline size */
-  height: 340px; /* Balanced ratio, no vertical stretching */
-  padding: 16px 0;
-  border-radius: 100px;
-  box-sizing: border-box;
-  
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-explorer-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  transition: color 0.15s ease;
+}
+
+.nx-explorer-title:hover {
+  color: #ffffff;
+}
+
+/* Tool belt container matching your photo query reference */
+.nx-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nx-action-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.nx-action-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-action-btn:disabled {
+  opacity: 0.15;
+  cursor: not-allowed;
+}
+
+.nx-action-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Real-time Workspace Search / Filter belt */
+.nx-search-belt {
+  padding: 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-search-input-frame {
+  display: flex;
+  align-items: center;
   background: rgba(255, 255, 255, 0.015);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.02);
-
-  /* Clean transitions on the width ensures smooth bilateral pop out */
-  transition: 
-    width 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    background 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  border-radius: 4px;
+  padding: 1px 4px;
+  transition: border-color 0.15s;
 }
 
-/* --- STATE 2: DOCK HOVER (Highly controlled, subtle scale up) --- */
-.nd-dock-expanded {
-  width: 64px; /* Scaled way down from previous build to remain micro-sized */
-  background: linear-gradient(180deg, rgba(20, 22, 28, 0.65) 0%, rgba(12, 13, 17, 0.8) 100%);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.75),
-    0 0 30px rgba(150, 165, 255, 0.04),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.1);
+.nx-search-input-frame:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Stack layout for item positions */
-.nd-items-stack {
+.nx-search-textbox {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 3px;
+}
+
+.nx-search-toggles {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.nx-search-tog-btn {
+  background: transparent;
+  border: none;
+  font-family: monospace;
+  font-size: 9px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.2);
+  padding: 1px 3px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.nx-search-tog-btn:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.nx-search-tog-btn.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Bookmarks Pinned Shelf */
+.nx-pinned-shelf {
+  padding: 8px 12px 4px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 4px;
+}
+
+.nx-shelf-title svg {
+  width: 8px;
+  height: 8px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.nx-shelf-items {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 32px;
-  width: 100%;
+  gap: 1px;
 }
 
-.nd-item-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  width: 100%;
-  cursor: pointer;
-}
-
-/* Capsule framing */
-.nd-capsule-container {
-  position: relative;
+.nx-shelf-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-}
-
-.nd-icon-fluid {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0);
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: transparent;
   border: 1px solid transparent;
-  z-index: 2;
-  box-sizing: border-box;
-  
-  transition: 
-    width 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    height 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    border-radius 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    background 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s;
 }
 
-.nd-icon {
-  width: 17px;
-  height: 17px;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+.nx-shelf-item:hover {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.02);
 }
 
-/* Ambient inner glow ring mesh */
-.nd-glow-layer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0px;
-  height: 0px;
-  background: radial-gradient(circle, rgba(155, 165, 255, 0.2) 0%, rgba(155, 165, 255, 0) 70%);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: width 0.35s ease, height 0.35s ease, opacity 0.35s ease;
+.nx-shelf-item.active {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* --- STATE 3: ITEM HOVER (Organic squircle interpolation) --- */
-.nd-row-hovered .nd-icon-fluid {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px; /* Organic Squircle shape */
-  color: #ffffff;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+.nx-shelf-icon-frame {
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
 }
 
-.nd-row-hovered .nd-glow-layer {
-  width: 80px;
-  height: 80px;
-  opacity: 1;
-}
-
-.nd-row-hovered .nd-icon {
-  transform: scale(1.05);
-}
-
-/* --- HARDWARE TOOLTIP DESIGN --- */
-.nd-tooltip {
-  position: absolute;
-  left: calc(100% + 16px);
-  top: 50%;
-  transform: translateY(-50%) scale(0.95);
-  background: rgba(18, 19, 23, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 6px 10px;
-  border-radius: 6px;
-  opacity: 0;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: 
-    opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1),
-    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.nd-tooltip-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 10px;
-  font-weight: 500;
+.nx-shelf-text {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
   white-space: nowrap;
-  letter-spacing: 0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
 }
 
-/* Reveal Tooltip seamlessly on active row hover */
-.nd-row-hovered .nd-tooltip {
+.nx-shelf-item:hover .nx-shelf-text {
+  color: #ffffff;
+}
+
+.nx-shelf-unpin-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  position: absolute;
+  right: 4px;
+}
+
+.nx-shelf-item:hover .nx-shelf-unpin-btn {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
-  transition-delay: 0.05s;
 }
 
-/* Decorative hardware pins */
-.nd-hardware-pin {
+/* Inner Fallback UX state for blank launches */
+.nx-empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 60%;
   width: 100%;
+}
+
+.nx-open-prompt-btn {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.15s ease;
+}
+
+.nx-open-prompt-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Scroll Container Layer */
+.nx-tree-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0 20px 0;
+}
+
+/* Drag and Drop feedback highlights */
+.nx-node-row.nx-drag-over {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tree Rows Definition */
+.nx-node-row {
+  display: flex;
+  align-items: center;
+  height: 22px; 
+  margin: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid transparent;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.nx-node-row:hover {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+/* Selected File Row Overlay State */
+.nx-row-selected {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Chevron and Icon sizes */
+.nx-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+  color: rgba(255, 255, 255, 0.15);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+.nx-chevron.open {
+  transform: rotate(90deg);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-chevron svg {
+  width: 8px;
+  height: 8px;
+}
+
+.nx-chevron-spacer {
+  width: 16px;
+}
+
+.nx-icon-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.nx-svg-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 1px;
+}
+
+.nx-svg-icon.folder {
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.15s;
+}
+
+.nx-svg-icon.folder.open {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Search Highlights */
+.nx-node-text.nx-search-match {
+  color: #ffffff !important;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Typography formatting */
+.nx-node-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+}
+
+.nx-node-row:hover .nx-node-text {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.nx-row-selected .nx-node-text {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.nx-file-ext {
+  color: rgba(255, 255, 255, 0.18);
+  font-size: 11px;
+}
+
+.nx-node-row:hover .nx-file-ext {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nx-file-ext.active {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Hover Quick Actions overlay inside row */
+.nx-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  position: absolute;
+  right: 4px;
+  background: #0B0B0D;
+  padding-left: 8px;
+}
+
+.nx-node-row:hover .nx-row-actions {
+  opacity: 1;
+}
+
+.nx-row-act-btn {
+  background: transparent;
+  border: none;
+  padding: 2px;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nx-row-act-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nx-row-act-btn svg {
+  width: 10px;
   height: 10px;
 }
 
-.nd-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.15);
-  transition: background-color 0.35s ease, transform 0.35s ease;
+/* Nested Children */
+.nx-nested-children {
+  display: flex;
+  flex-direction: column;
 }
 
-.nd-dock-expanded .nd-dot {
-  background-color: rgba(155, 170, 255, 0.6);
-  transform: scale(1.1);
+/* Inline form styling */
+.nx-inline-input-form {
+  margin: 2px 6px;
+  width: 100%;
 }
 
-/* --- ACTIVE STATE INDICATOR PILL --- */
-.nd-active-indicator {
+.nx-inline-input-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.nx-inline-input-wrapper::before {
+  content: '';
   position: absolute;
-  left: -2px; /* Tucked slightly into the left edge margins */
-  width: 3px;
-  height: 0px;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.45);
   border-radius: 99px;
-  background: #c084fc; /* Vibrant purple indicator */
-  box-shadow: 0 0 10px #c084fc, 0 0 20px rgba(192, 132, 252, 0.4);
-  opacity: 0;
-  transition: 
-    height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.25s ease;
-  z-index: 5;
 }
 
-/* Base Active State Layout */
-.nd-row-active .nd-active-indicator {
-  height: 16px; /* Spawns a nice, sharp dynamic micro-bar */
-  opacity: 1;
+.nx-inline-textbox {
+  width: 90%;
+  background: #121214;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: -apple-system, sans-serif;
+  font-size: 11.5px;
+  padding: 3px 8px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Subtle persistence highlight when an item is active but not explicitly hovered */
-.nd-row-active .nd-icon-fluid {
-  color: rgba(255, 255, 255, 0.85);
+.nx-inline-textbox:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: #161619;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
 }
 
-/* Adjust active bar sizing when the dock itself swells open */
-.nd-dock-expanded .nd-row-active .nd-active-indicator {
-  height: 24px;
-  left: 2px;
+/* Floating custom glass context menu */
+.nx-custom-context-menu {
+  position: fixed;
+  background: rgba(13, 13, 16, 0.88);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  border-radius: 10px;
+  padding: 5px 0;
+  width: 160px;
+  z-index: 10000;
+  animation: nx-fade-in-up 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nx-fade-in-up {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.nx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  margin: 0 4px;
+  border-radius: 6px;
+  transition: all 0.12s ease;
+}
+
+.nx-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.nx-menu-item.delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+
+.nx-menu-item.delete:hover svg {
+  color: #ef4444;
+}
+
+.nx-menu-item svg {
+  width: 12px;
+  height: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.12s ease;
+}
+
+.nx-menu-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  margin: 4px 0;
+}
+
+/* Sleek Scrollbar */
+.nx-tree-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.nx-tree-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nx-tree-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 99px;
+}
+.nx-tree-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 </file>
 
-<file path="nexel-ide/src/components/NavDock.tsx">
-import React, { useState } from 'react';
-import './NavDock.css';
+<file path="nexel-ide/src/components/Explorer.tsx">
+import React, { useState, useEffect, useRef } from 'react';
+import './Explorer.css';
+import type { IFileNode } from '../nexel-env';
 
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ReactNode;
+interface FileNode {
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  isOpen?: boolean;
+  children?: FileNode[];
 }
 
-interface NavDockProps {
-  activeSection: string;
-  onSelect: (id: string) => void;
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  node: FileNode | null;
 }
 
-export const NavDock: React.FC<NavDockProps> = ({ activeSection, onSelect }) => {
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [isDockHovered, setIsDockHovered] = useState<boolean>(false);
+interface InlineInputState {
+  visible: boolean;
+  nodePath: string; // The parent folder path or the target node path to rename
+  mode: 'new-file' | 'new-folder' | 'rename';
+  defaultValue: string;
+}
 
-  const navItems: NavItem[] = [
-    {
-      id: 'workspace',
-      label: 'Workspace Explorer',
-      icon: (
-        <svg className="nd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'judge',
-      label: 'Judge System',
-      icon: (
-        <svg className="nd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 22V13m0 0l-4 2m4-2l4 2" />
-          <path d="M12 7V2m0 5a3 3 0 1 0 0 6 3 3 0 1 0 0-6z" />
-          <path d="M5 17h14M3 22h18" />
-        </svg>
-      ),
-    },
-  ];
+interface ExplorerProps {
+  onFileSelect?: (filePath: string, isDoubleClicked?: boolean) => void;
+  activeFilePath?: string | null;
+}
+
+export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath }) => {
+  const [rootPath, setRootPath] = useState<string | null>(null);
+  const [rootName, setRootName] = useState<string>('NO WORKSPACE');
+  const [tree, setTree] = useState<FileNode[]>([]);
+  const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
+  
+  // Search & Filters State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRegex, setIsRegex] = useState(false);
+  const [isMatchCase, setIsMatchCase] = useState(false);
+
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    node: null
+  });
+
+  // Inline Input State for File/Folder creation or renaming
+  const [inlineInput, setInlineInput] = useState<InlineInputState>({
+    visible: false,
+    nodePath: '',
+    mode: 'new-file',
+    defaultValue: ''
+  });
+
+  const [lastSelectedNode, setLastSelectedNode] = useState<FileNode | null>(null);
+  
+  const inputRef = useRef<HTMLInputElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // Load initial workspace if saved or prompt
+  const handleOpenFolder = async () => {
+    try {
+      const selectedDir = await window.nexelAPI.openWorkspaceDir();
+      if (!selectedDir) return;
+      setRootPath(selectedDir);
+      const parsedName = selectedDir.split(/[\\/]/).pop() || selectedDir;
+      setRootName(parsedName.toUpperCase());
+      await refreshTree(selectedDir);
+    } catch (error) {
+      console.error("Workspace mount failure:", error);
+    }
+  };
+
+  const getOpenFolderPaths = (nodes: FileNode[]): Set<string> => {
+    const paths = new Set<string>();
+    const traverse = (nodeList: FileNode[]) => {
+      for (const node of nodeList) {
+        if (node.type === 'folder' && node.isOpen) {
+          paths.add(node.path);
+        }
+        if (node.children) {
+          traverse(node.children);
+        }
+      }
+    };
+    traverse(nodes);
+    return paths;
+  };
+
+  const refreshTree = async (pathTarget: string, forceOpenPaths?: Set<string>) => {
+    try {
+      const data = await window.nexelAPI.readWorkspaceFiles(pathTarget);
+      if (!data) return;
+      
+      let nodesArray: IFileNode[] = [];
+      if (Array.isArray(data)) {
+        nodesArray = data;
+      } else if (data && typeof data === 'object') {
+        const d = data as any;
+        if (d.children && Array.isArray(d.children)) {
+          nodesArray = d.children;
+        } else {
+          nodesArray = [data as IFileNode];
+        }
+      }
+      
+      const openPaths = getOpenFolderPaths(tree);
+      if (forceOpenPaths) {
+        forceOpenPaths.forEach(p => openPaths.add(p));
+      }
+      
+      setTree(transformNodes(nodesArray, openPaths));
+    } catch (e) {
+      console.error("Workspace tree hydration failure:", e);
+    }
+  };
+
+  const transformNodes = (nodes: IFileNode[], openPaths: Set<string> = new Set()): FileNode[] => {
+    return nodes.map((node) => ({
+      name: node.name,
+      path: node.path,
+      type: node.type,
+      isOpen: node.type === 'folder' && openPaths.has(node.path),
+      children: node.children ? transformNodes(node.children, openPaths) : [],
+    }));
+  };
+
+  // Close context menu when clicking elsewhere
+  useEffect(() => {
+    const clickHandler = (e: MouseEvent) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
+        setContextMenu(prev => ({ ...prev, visible: false }));
+      }
+    };
+    window.addEventListener('click', clickHandler);
+    return () => window.removeEventListener('click', clickHandler);
+  }, []);
+
+  // Titlebar Menu Custom Event bindings
+  useEffect(() => {
+    const onOpen = () => handleOpenFolder();
+    const onNewFile = () => handleHeaderNewFile();
+    const onNewFolder = () => handleHeaderNewFolder();
+
+    window.addEventListener('nx-open-folder', onOpen);
+    window.addEventListener('nx-new-file', onNewFile);
+    window.addEventListener('nx-new-folder', onNewFolder);
+
+    return () => {
+      window.removeEventListener('nx-open-folder', onOpen);
+      window.removeEventListener('nx-new-file', onNewFile);
+      window.removeEventListener('nx-new-folder', onNewFolder);
+    };
+  }, [rootPath, lastSelectedNode, rootName]);
+
+  // Autofocus inline input and select text
+  useEffect(() => {
+    if (inlineInput.visible && inputRef.current) {
+      inputRef.current.focus();
+      if (inlineInput.mode === 'rename') {
+        const dotIndex = inlineInput.defaultValue.lastIndexOf('.');
+        if (dotIndex > 0 && inlineInput.mode === 'rename') {
+          inputRef.current.setSelectionRange(0, dotIndex);
+        } else {
+          inputRef.current.select();
+        }
+      } else {
+        inputRef.current.select();
+      }
+    }
+  }, [inlineInput.visible]);
+
+  // Recursively toggles folder open state
+  const toggleFolder = (nodePath: string) => {
+    const deepToggle = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.path === nodePath && node.type === 'folder') {
+          return { ...node, isOpen: !node.isOpen };
+        }
+        if (node.children) {
+          return { ...node, children: deepToggle(node.children) };
+        }
+        return node;
+      });
+    };
+    setTree(deepToggle(tree));
+  };
+
+  const collapseAllFolders = () => {
+    const deepCollapse = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map(node => {
+        if (node.type === 'folder') {
+          return { ...node, isOpen: false, children: node.children ? deepCollapse(node.children) : [] };
+        }
+        return node;
+      });
+    };
+    setTree(deepCollapse(tree));
+  };
+
+  // Drag and Drop implementation
+  const handleDragStart = (e: React.DragEvent, node: FileNode) => {
+    e.dataTransfer.setData('text/plain', node.path);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, node: FileNode) => {
+    if (node.type === 'folder') {
+      e.preventDefault(); // Allows drop
+      e.currentTarget.classList.add('nx-drag-over');
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('nx-drag-over');
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetNode: FileNode) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('nx-drag-over');
+    
+    const sourcePath = e.dataTransfer.getData('text/plain');
+    if (!sourcePath || sourcePath === targetNode.path) return;
+
+    const sourceName = sourcePath.split('/').pop() || '';
+    const newPath = `${targetNode.path}/${sourceName}`;
+
+    try {
+      await window.nexelAPI.renameNode(sourcePath, newPath);
+      if (rootPath) refreshTree(rootPath);
+    } catch (err) {
+      console.error("Drop relocate operation failed:", err);
+    }
+  };
+
+  // Context Menu Actions
+  const handleContextMenu = (e: React.MouseEvent, node: FileNode) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Estimate menu height based on node type
+    const menuHeight = node.type === 'folder' ? 220 : 180;
+    const adjustedY = e.clientY + menuHeight > window.innerHeight 
+      ? Math.max(10, e.clientY - menuHeight) 
+      : e.clientY;
+
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: adjustedY,
+      node
+    });
+  };
+
+  const handleEmptyAreaContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!rootPath) return;
+
+    const menuHeight = 220;
+    const adjustedY = e.clientY + menuHeight > window.innerHeight 
+      ? Math.max(10, e.clientY - menuHeight) 
+      : e.clientY;
+
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: adjustedY,
+      node: { name: rootName, path: rootPath, type: 'folder' } // Root folder context
+    });
+  };
+
+  const triggerNewFile = (parentFolder: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    setInlineInput({
+      visible: true,
+      nodePath: parentFolder.path,
+      mode: 'new-file',
+      defaultValue: 'untitled.txt'
+    });
+  };
+
+  const triggerNewFolder = (parentFolder: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    setInlineInput({
+      visible: true,
+      nodePath: parentFolder.path,
+      mode: 'new-folder',
+      defaultValue: 'NewFolder'
+    });
+  };
+
+  const handleHeaderNewFile = () => {
+    if (!rootPath) return;
+    let parentNode: FileNode = { name: rootName, path: rootPath, type: 'folder' };
+    if (lastSelectedNode) {
+      if (lastSelectedNode.type === 'folder') {
+        parentNode = lastSelectedNode;
+      } else {
+        const lastSlash = lastSelectedNode.path.lastIndexOf('/');
+        const parentPath = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
+        parentNode = { name: '', path: parentPath, type: 'folder' };
+      }
+    }
+    triggerNewFile(parentNode);
+  };
+
+  const handleHeaderNewFolder = () => {
+    if (!rootPath) return;
+    let parentNode: FileNode = { name: rootName, path: rootPath, type: 'folder' };
+    if (lastSelectedNode) {
+      if (lastSelectedNode.type === 'folder') {
+        parentNode = lastSelectedNode;
+      } else {
+        const lastSlash = lastSelectedNode.path.lastIndexOf('/');
+        const parentPath = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
+        parentNode = { name: '', path: parentPath, type: 'folder' };
+      }
+    }
+    triggerNewFolder(parentNode);
+  };
+
+  const triggerRename = (node: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    setInlineInput({
+      visible: true,
+      nodePath: node.path,
+      mode: 'rename',
+      defaultValue: node.name
+    });
+  };
+
+  const handleDelete = async (node: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    const isFolder = node.type === 'folder';
+    const confirmMessage = isFolder 
+      ? `Are you absolutely sure you want to permanently delete the folder "${node.name}" and all of its contents?`
+      : `Are you absolutely sure you want to permanently delete the file "${node.name}"?`;
+      
+    const confirmDelete = window.confirm(confirmMessage);
+    if (!confirmDelete) return;
+
+    try {
+      await window.nexelAPI.deleteNode(node.path);
+      // Unpin if pinned
+      setPinnedPaths(prev => prev.filter(p => p !== node.path));
+      if (rootPath) refreshTree(rootPath);
+    } catch (err) {
+      console.error("Deletion failed:", err);
+    }
+  };
+
+  const handleTogglePin = (node: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    setPinnedPaths(prev => 
+      prev.includes(node.path) ? prev.filter(p => p !== node.path) : [...prev, node.path]
+    );
+  };
+
+  const handleCopyPath = (node: FileNode) => {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    navigator.clipboard.writeText(node.path);
+  };
+
+  // Submit Inline Input (Create / Rename)
+  const handleInlineSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const value = inputRef.current?.value.trim();
+    if (!value) {
+      setInlineInput(prev => ({ ...prev, visible: false }));
+      return;
+    }
+
+    try {
+      let createdPath = '';
+      const forceOpenPaths = new Set<string>();
+
+      if (inlineInput.mode === 'new-file') {
+        createdPath = await window.nexelAPI.createFile(inlineInput.nodePath, value);
+        if (inlineInput.nodePath) {
+          forceOpenPaths.add(inlineInput.nodePath.replace(/\\/g, '/'));
+        }
+      } else if (inlineInput.mode === 'new-folder') {
+        createdPath = await window.nexelAPI.createFolder(inlineInput.nodePath, value);
+        if (inlineInput.nodePath) {
+          forceOpenPaths.add(inlineInput.nodePath.replace(/\\/g, '/'));
+        }
+      } else if (inlineInput.mode === 'rename') {
+        const pathSegments = inlineInput.nodePath.split('/');
+        pathSegments.pop();
+        const parentPath = pathSegments.join('/');
+        const targetNewPath = `${parentPath}/${value}`;
+        await window.nexelAPI.renameNode(inlineInput.nodePath, targetNewPath);
+        
+        // Update pinning reference if renamed
+        setPinnedPaths(prev => prev.map(p => p === inlineInput.nodePath ? targetNewPath : p));
+      }
+
+      if (rootPath) {
+        await refreshTree(rootPath, forceOpenPaths);
+      }
+
+      if (inlineInput.mode === 'new-file' && createdPath && onFileSelect) {
+        const formattedPath = createdPath.replace(/\\/g, '/');
+        onFileSelect(formattedPath, true);
+      }
+    } catch (err) {
+      console.error("Inline fs write execution failed:", err);
+      alert(`Operation failed. Ensure a valid name is provided.`);
+    } finally {
+      setInlineInput(prev => ({ ...prev, visible: false }));
+    }
+  };
+
+  // Get Custom Premium Vector Icons based on Extension - Minimal Monochrome
+  const getFileIcon = (fileName: string) => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'ts':
+      case 'tsx':
+      case 'js':
+      case 'jsx':
+      case 'html':
+      case 'css':
+      case 'json':
+      case 'md':
+      case 'cpp':
+      case 'c':
+      case 'h':
+      case 'py':
+      default:
+        return (
+          <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+            <polyline points="13 2 13 9 20 9"></polyline>
+          </svg>
+        );
+    }
+  };
+
+  // Renders the muted/accented extension beautifully
+  const renderLabelWithHighlights = (name: string, isSelected: boolean) => {
+    // Implement Search Match Highlights
+    if (searchQuery) {
+      let isMatch = false;
+      let q = searchQuery;
+      if (!isMatchCase) q = q.toLowerCase();
+
+      let target = name;
+      if (!isMatchCase) target = target.toLowerCase();
+
+      if (isRegex) {
+        try {
+          const reg = new RegExp(searchQuery, isMatchCase ? '' : 'i');
+          isMatch = reg.test(name);
+        } catch(e) {}
+      } else {
+        isMatch = target.includes(q);
+      }
+
+      if (isMatch) {
+        return <span className="nx-node-text nx-search-match">{name}</span>;
+      }
+    }
+
+    const dotIndex = name.lastIndexOf('.');
+    if (dotIndex === -1 || name.startsWith('.')) {
+      return <span className="nx-node-text">{name}</span>;
+    }
+    const baseName = name.substring(0, dotIndex);
+    const extension = name.substring(dotIndex);
+    return (
+      <span className="nx-node-text">
+        {baseName}
+        <span className={`nx-file-ext ${isSelected ? 'active' : ''}`}>{extension}</span>
+      </span>
+    );
+  };
+
+  // Tree recursive rendering
+  const renderTree = (nodes: FileNode[], depth = 0) => {
+    return nodes.map((node, index) => {
+      const isSelected = activeFilePath === node.path;
+      const isFolder = node.type === 'folder';
+
+      // Inline editing element placement
+      const isInlineEditingThisNode = inlineInput.visible && inlineInput.nodePath === node.path && inlineInput.mode === 'rename';
+      const showInlineCreationHere = inlineInput.visible && inlineInput.nodePath === node.path && (inlineInput.mode === 'new-file' || inlineInput.mode === 'new-folder');
+
+      return (
+        <div key={`${node.path}-${index}`} className="nx-node-block">
+          {isInlineEditingThisNode ? (
+            <form onSubmit={handleInlineSubmit} className="nx-inline-input-form" style={{ paddingLeft: `${depth * 14 + 18}px` }}>
+              <div className="nx-inline-input-wrapper">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  defaultValue={inlineInput.defaultValue}
+                  onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                  }}
+                  className="nx-inline-textbox"
+                />
+              </div>
+            </form>
+          ) : (
+            <div 
+              className={`nx-node-row ${isSelected ? 'nx-row-selected' : ''}`}
+              style={{ paddingLeft: `${depth * 14 + 18}px` }}
+              draggable
+              onDragStart={(e) => handleDragStart(e, node)}
+              onDragOver={(e) => handleDragOver(e, node)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, node)}
+              onContextMenu={(e) => handleContextMenu(e, node)}
+              onClick={() => {
+                setLastSelectedNode(node);
+                if (isFolder) {
+                  toggleFolder(node.path);
+                } else {
+                  if (onFileSelect) onFileSelect(node.path, false);
+                }
+              }}
+              onDoubleClick={() => {
+                setLastSelectedNode(node);
+                if (!isFolder && onFileSelect) {
+                  onFileSelect(node.path, true);
+                }
+              }}
+            >
+              {isFolder ? (
+                <span className={`nx-chevron ${node.isOpen ? 'open' : ''}`}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 5l7 7-7 7"/></svg>
+                </span>
+              ) : (
+                <span className="nx-chevron-spacer" />
+              )}
+
+              <span className="nx-icon-frame">
+                {isFolder ? (
+                  <svg className={`nx-svg-icon folder ${node.isOpen ? 'open' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
+                ) : (
+                  getFileIcon(node.name)
+                )}
+              </span>
+
+              {renderLabelWithHighlights(node.name, isSelected)}
+
+              {/* Hover quick shortcut overlay */}
+              <div className="nx-row-actions">
+                {isFolder && (
+                  <button className="nx-row-act-btn" title="New File" onClick={(e) => { e.stopPropagation(); triggerNewFile(node); }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                  </button>
+                )}
+                <button className="nx-row-act-btn delete" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(node); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Inline creation field inside matching folder tree */}
+          {showInlineCreationHere && (
+            <div style={{ paddingLeft: `${(depth + 1) * 14 + 18}px` }}>
+              <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
+                <div className="nx-inline-input-wrapper">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    defaultValue={inlineInput.defaultValue}
+                    onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                    }}
+                    className="nx-inline-textbox"
+                  />
+                </div>
+              </form>
+            </div>
+          )}
+
+          {isFolder && node.isOpen && node.children && (
+            <div className="nx-nested-children">
+              {renderTree(node.children, depth + 1)}
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
 
   return (
-    <div className="nd-wrapper-axis">
-      <div 
-        className={`nd-dock ${isDockHovered ? 'nd-dock-expanded' : ''}`}
-        onMouseEnter={() => setIsDockHovered(true)}
-        onMouseLeave={() => {
-          setIsDockHovered(false);
-          setHoveredItem(null);
-        }}
-      >
-        {/* Top Specular Accent */}
-        <div className="nd-hardware-pin">
-          <div className="nd-dot" />
-        </div>
-
-        {/* Navigation Core */}
-        <div className="nd-items-stack">
-          {navItems.map((item) => {
-            const isItemHovered = hoveredItem === item.id;
-            const isItemActive = activeSection === item.id;
-
-            return (
-              <div
-                key={item.id}
-                className={`nd-item-row ${isItemHovered ? 'nd-row-hovered' : ''} ${isItemActive ? 'nd-row-active' : ''}`}
-                onMouseEnter={() => setHoveredItem(item.id)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onClick={() => onSelect(item.id)}
-              >
-                {/* Active Indicator Pillar */}
-                <div className="nd-active-indicator" />
-
-                <div className="nd-capsule-container">
-                  <div className="nd-glow-layer" />
-                  <div className="nd-icon-fluid">
-                    {item.icon}
-                  </div>
-                </div>
-
-                {/* Hardware Tooltip */}
-                <div className="nd-tooltip">
-                  <span className="nd-tooltip-text">{item.label}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Bottom Specular Accent */}
-        <div className="nd-hardware-pin">
-          <div className="nd-dot" />
+    <div className="nx-explorer-wrapper">
+      <div className="nx-explorer-header">
+        <span className="nx-explorer-title" onClick={handleOpenFolder} title="Click to Switch Working Directories">
+          {rootName}
+        </span>
+        
+        <div className="nx-action-bar">
+          <button 
+            className="nx-action-btn" 
+            title="New File" 
+            onClick={handleHeaderNewFile}
+            disabled={!rootPath}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          </button>
+          <button 
+            className="nx-action-btn" 
+            title="New Folder" 
+            onClick={handleHeaderNewFolder}
+            disabled={!rootPath}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+          </button>
+          <button className="nx-action-btn" title="Refresh Tree" onClick={() => rootPath && refreshTree(rootPath)} disabled={!rootPath}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          </button>
+          <button className="nx-action-btn" title="Collapse All Folders" onClick={collapseAllFolders} disabled={tree.length === 0}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="2.5"></rect><line x1="7" y1="12" x2="17" y2="12"></line></svg>
+          </button>
         </div>
       </div>
+
+      {/* Real-time Workspace Search/Filter belt */}
+      {rootPath && (
+        <div className="nx-search-belt">
+          <div className="nx-search-input-frame">
+            <input 
+              type="text" 
+              placeholder="Search files..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="nx-search-textbox"
+            />
+            <div className="nx-search-toggles">
+              <button 
+                className={`nx-search-tog-btn ${isMatchCase ? 'active' : ''}`}
+                title="Match Case"
+                onClick={() => setIsMatchCase(!isMatchCase)}
+              >
+                Aa
+              </button>
+              <button 
+                className={`nx-search-tog-btn ${isRegex ? 'active' : ''}`}
+                title="Use Regular Expression"
+                onClick={() => setIsRegex(!isRegex)}
+              >
+                .*
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sleek Bookmarks/Pinned shelf */}
+      {pinnedPaths.length > 0 && (
+        <div className="nx-pinned-shelf">
+          <div className="nx-shelf-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            PINNED WORKSPACE FILES
+          </div>
+          <div className="nx-shelf-items">
+            {pinnedPaths.map((pathStr) => {
+              const nameStr = pathStr.split('/').pop() || '';
+              return (
+                <div 
+                  key={pathStr} 
+                  className={`nx-shelf-item ${activeFilePath === pathStr ? 'active' : ''}`}
+                  onClick={() => onFileSelect && onFileSelect(pathStr, false)}
+                >
+                  <span className="nx-shelf-icon-frame">{getFileIcon(nameStr)}</span>
+                  <span className="nx-shelf-text">{nameStr}</span>
+                  <button 
+                    className="nx-shelf-unpin-btn" 
+                    title="Unpin File"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPinnedPaths(prev => prev.filter(p => p !== pathStr));
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Main tree list scroll panel */}
+      <div 
+        className="nx-tree-scroll"
+        onContextMenu={handleEmptyAreaContextMenu}
+      >
+        {tree.length === 0 ? (
+          <div className="nx-empty-state">
+            <button className="nx-open-prompt-btn" onClick={handleOpenFolder}>Open Folder</button>
+          </div>
+        ) : (
+          <>
+            {/* Render root level inline creation form */}
+            {inlineInput.visible && inlineInput.nodePath === rootPath && (inlineInput.mode === 'new-file' || inlineInput.mode === 'new-folder') && (
+              <div style={{ paddingLeft: '18px', margin: '2px 8px' }}>
+                <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
+                  <div className="nx-inline-input-wrapper">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      defaultValue={inlineInput.defaultValue}
+                      onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                      }}
+                      className="nx-inline-textbox"
+                      style={{ width: '95%' }}
+                    />
+                  </div>
+                </form>
+              </div>
+            )}
+            {renderTree(tree)}
+          </>
+        )}
+      </div>
+
+      {/* Floating Custom Glassmorphism Context Menu */}
+      {contextMenu.visible && contextMenu.node && (
+        <div 
+          ref={contextMenuRef}
+          className="nx-custom-context-menu" 
+          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+        >
+          {contextMenu.node.type === 'folder' && (
+            <>
+              <div className="nx-menu-item" onClick={() => triggerNewFile(contextMenu.node!)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                New File
+              </div>
+              <div className="nx-menu-item" onClick={() => triggerNewFolder(contextMenu.node!)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                New Folder
+              </div>
+              <hr className="nx-menu-divider" />
+            </>
+          )}
+
+          {contextMenu.node.path !== rootPath && (
+            <div className="nx-menu-item" onClick={() => triggerRename(contextMenu.node!)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Rename
+            </div>
+          )}
+
+          {contextMenu.node.type === 'file' && (
+            <div className="nx-menu-item" onClick={() => handleTogglePin(contextMenu.node!)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              {pinnedPaths.includes(contextMenu.node.path) ? 'Unpin File' : 'Pin File'}
+            </div>
+          )}
+
+          <div className="nx-menu-item" onClick={() => handleCopyPath(contextMenu.node!)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Full Path
+          </div>
+
+          {contextMenu.node.path !== rootPath && (
+            <>
+              <hr className="nx-menu-divider" />
+              <div className="nx-menu-item delete" onClick={() => handleDelete(contextMenu.node!)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                {contextMenu.node.type === 'folder' ? 'Delete Folder' : 'Delete File'}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default NavDock;
-</file>
-
-<file path="nexel-ide/src/index.css">
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+export default Explorer;
 </file>
 
 <file path="nexel-ide/src/main.tsx">
@@ -1117,7 +3498,7 @@ createRoot(document.getElementById('root')!).render(
 export interface IFileNode {
   name: string;       // e.g., "main.cpp"
   path: string;       // e.g., "C:/contests/main.cpp"
-  isDirectory: boolean;
+  type: 'file' | 'folder';
   children?: IFileNode[]; // Recursive: folders can have more files/folders inside
 }
 
@@ -1126,7 +3507,17 @@ export interface INexelAPI {
   maximizeWindow: () => void;
   closeWindow: () => void;
   openWorkspaceDir: () => Promise<string | null>;
-  readWorkspaceFiles: (dirPath: string) => Promise<IFileNode[]>; // <-- Fixes the lint error cleanly!
+  readWorkspaceFiles: (dirPath: string) => Promise<IFileNode[]>;
+  createFile: (parentPath: string, fileName: string) => Promise<string>;
+  createFolder: (parentPath: string, folderName: string) => Promise<string>;
+  renameNode: (oldPath: string, newPath: string) => Promise<string>;
+  deleteNode: (targetPath: string) => Promise<boolean>;
+  readFileContent: (filePath: string) => Promise<string>;
+  writeFileContent: (filePath: string, content: string) => Promise<boolean>;
+  createTerminal: () => Promise<boolean>;
+  writeTerminal: (data: string) => void;
+  resizeTerminal: (cols: number, rows: number) => void;
+  onTerminalData: (callback: (data: string) => void) => void;
 }
 
 declare global {
@@ -1190,44 +3581,201 @@ export default defineConfig({
 <file path="nexel-ide/main.cjs">
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs').promises; // Add full async fs capabilities
+const { spawn } = require('child_process');
+
+let pty;
+try {
+  pty = require('node-pty');
+} catch (e) {
+  console.warn("node-pty load failure, falling back to standard spawn:", e);
+}
+
 let mainWindow;
+let ptyProcess = null;
+let isNativePty = false;
 
 function createWindow() {
-  // Create the browser window configuration
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    backgroundColor: '#16171d', // Matches your premium dark theme background
+    backgroundColor: '#0B0B0D',
+    frame: false,
     webPreferences: {
-      // Points to a preload script to securely bridge React and Electron
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
-// Handle window frame controls from our custom title bar
-ipcMain.on('window-control', (event, action) => {
-  const win = BrowserWindow.getFocusedWindow();
-  if (!win) return;
-  if (action === 'minimize') win.minimize();
-  if (action === 'maximize') win.isMaximized() ? win.unmaximize() : win.maximize();
-  if (action === 'close') win.close();
-});
 
-// Handle the Native Folder Picker Dialog
-ipcMain.handle('fs:open-dir', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openDirectory']
+  mainWindow.setMenu(null);
+
+  // Window frame control receivers
+  ipcMain.on('window-control', (event, action) => {
+    const win = BrowserWindow.getFocusedWindow();
+    if (!win) return;
+    if (action === 'minimize') win.minimize();
+    if (action === 'maximize') win.isMaximized() ? win.unmaximize() : win.maximize();
+    if (action === 'close') win.close();
   });
-  if (result.canceled) return null;
-  return result.filePaths[0]; // Returns the exact absolute path chosen by the user
-});
-  // During development, read the local Vite server URL.
-  // If we build the app for production, it can fall back to the compiled static index.html.
+
+  // Terminal PTY process IPC receivers
+  ipcMain.handle('terminal:create', async (event) => {
+    if (ptyProcess) {
+      try {
+        if (isNativePty) ptyProcess.kill();
+        else ptyProcess.kill();
+      } catch (err) {}
+      ptyProcess = null;
+    }
+
+    const shell = process.platform === 'win32' ? 'powershell.exe' : 'bash';
+
+    if (pty) {
+      try {
+        ptyProcess = pty.spawn(shell, [], {
+          name: 'xterm-color',
+          cols: 80,
+          rows: 10,
+          cwd: process.env.HOME || process.env.USERPROFILE,
+          env: process.env
+        });
+        isNativePty = true;
+
+        ptyProcess.onData((data) => {
+          if (mainWindow) mainWindow.webContents.send('terminal:data', data);
+        });
+
+        ptyProcess.onExit(() => {
+          ptyProcess = null;
+        });
+        return isNativePty;
+      } catch (e) {
+        console.warn("PTY native spawn crash, falling back to process spawn:", e);
+      }
+    }
+
+    // Process shell fallback
+    try {
+      const args = shell === 'powershell.exe' ? ['-NoLogo', '-Interactive'] : [];
+      ptyProcess = spawn(shell, args, {
+        cwd: process.env.HOME || process.env.USERPROFILE,
+        env: process.env
+      });
+      isNativePty = false;
+
+      ptyProcess.stdout.on('data', (data) => {
+        if (mainWindow) mainWindow.webContents.send('terminal:data', data.toString());
+      });
+      ptyProcess.stderr.on('data', (data) => {
+        if (mainWindow) mainWindow.webContents.send('terminal:data', data.toString());
+      });
+
+      ptyProcess.on('close', () => {
+        ptyProcess = null;
+      });
+    } catch (err) {
+      console.error("Shell process spawn failure:", err);
+    }
+
+    return isNativePty;
+  });
+
+  ipcMain.on('terminal:write', (event, data) => {
+    if (!ptyProcess) return;
+    if (isNativePty) {
+      ptyProcess.write(data);
+    } else {
+      ptyProcess.stdin.write(data);
+    }
+  });
+
+  ipcMain.on('terminal:resize', (event, cols, rows) => {
+    if (ptyProcess && isNativePty) {
+      try {
+        ptyProcess.resize(cols, rows);
+      } catch (err) {
+        console.error("PTY resize failed:", err);
+      }
+    }
+  });
+
+  // 1. Handle Native Folder Picker Dialog Channel
+  ipcMain.handle('fs:open-dir', async () => {
+    try {
+      const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
+        title: 'Select Nexel IDE Workspace Folder'
+      });
+      if (result.canceled) return null;
+      return result.filePaths[0]; 
+    } catch (err) {
+      console.error("Native showOpenDialog call failed:", err);
+      throw err;
+    }
+  });
+
+  // 2. Handle Recursive Directory Scanning Content Compilation
+  ipcMain.handle('fs:read-files', async (event, dirPath) => {
+    try {
+      // We read the children of the directory itself so the tree lists contents, not the root node itself
+      const stats = await fs.stat(dirPath);
+      if (!stats.isDirectory()) return [];
+      const rawFiles = await fs.readdir(dirPath);
+      const childrenPromises = rawFiles.map(file => buildFileTree(path.join(dirPath, file)));
+      const children = await Promise.all(childrenPromises);
+      
+      children.sort((a, b) => {
+        if (a.type === b.type) return a.name.localeCompare(b.name);
+        return a.type === 'folder' ? -1 : 1;
+      });
+      return children;
+    } catch (err) {
+      console.error("Failed parsing directory branch trees:", err);
+      throw err;
+    }
+  });
+
+  // 3. Create File
+  ipcMain.handle('fs:create-file', async (event, parentPath, fileName) => {
+    const filePath = path.join(parentPath, fileName);
+    await fs.writeFile(filePath, '', 'utf8');
+    return filePath;
+  });
+
+  // 4. Create Folder
+  ipcMain.handle('fs:create-folder', async (event, parentPath, folderName) => {
+    const folderPath = path.join(parentPath, folderName);
+    await fs.mkdir(folderPath, { recursive: true });
+    return folderPath;
+  });
+
+  // 5. Rename Node
+  ipcMain.handle('fs:rename', async (event, oldPath, newPath) => {
+    await fs.rename(oldPath, newPath);
+    return newPath;
+  });
+
+  // 6. Delete Node
+  ipcMain.handle('fs:delete', async (event, targetPath) => {
+    await fs.rm(targetPath, { recursive: true, force: true });
+    return true;
+  });
+
+  // 7. Read File Content
+  ipcMain.handle('fs:read-file-content', async (event, filePath) => {
+    return await fs.readFile(filePath, 'utf8');
+  });
+
+  // 8. Write File Content
+  ipcMain.handle('fs:write-file-content', async (event, filePath, content) => {
+    await fs.writeFile(filePath, content, 'utf8');
+    return true;
+  });
+
   const startUrl = process.env.ELECTRON_START_URL || 'http://localhost:5173';
   mainWindow.loadURL(startUrl);
 
-  // Open the DevTools automatically during development so you can debug console errors easily
   if (process.env.ELECTRON_START_URL) {
     mainWindow.webContents.openDevTools();
   }
@@ -1237,20 +3785,37 @@ ipcMain.handle('fs:open-dir', async () => {
   });
 }
 
-// Initialize Electron when the operating system layer is ready
+// Recursive helper algorithm matching the internal monochrome state specs
+async function buildFileTree(targetPath) {
+  const name = path.basename(targetPath);
+  const stats = await fs.stat(targetPath);
+  
+  if (stats.isDirectory()) {
+    // Ignore heavy build system environments automatically for speed stability
+    if (name === 'node_modules' || name === '.git' || name === '.vite') {
+      return { name, path: targetPath.replace(/\\/g, '/'), type: 'folder', isOpen: false, children: [] };
+    }
+
+    const rawFiles = await fs.readdir(targetPath);
+    const childrenPromises = rawFiles.map(file => buildFileTree(path.join(targetPath, file)));
+    const children = await Promise.all(childrenPromises);
+    
+    // Sort directories above standalone assets cleanly
+    children.sort((a, b) => {
+      if (a.type === b.type) return a.name.localeCompare(b.name);
+      return a.type === 'folder' ? -1 : 1;
+    });
+
+    return { name, path: targetPath.replace(/\\/g, '/'), type: 'folder', isOpen: false, children };
+  } else {
+    return { name, path: targetPath.replace(/\\/g, '/'), type: 'file' };
+  }
+}
+
 app.whenReady().then(createWindow);
 
-// Quit the application completely when all desktop windows are closed
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 </file>
 
@@ -1269,8 +3834,12 @@ app.on('activate', () => {
     "electron:dev": "npx concurrently \"npm run dev\" \"npx wait-on http://localhost:5173 && npx electron .\""
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "node-pty": "^1.1.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -1292,59 +3861,374 @@ app.on('activate', () => {
 }
 </file>
 
-<file path="nexel-ide/src/App.tsx">
-import { useState } from 'react';
-import { NavDock } from './components/NavDock';
-import './App.css';
+<file path="nexel-ide/src/components/NavDock.css">
+/* Central alignment axis - elegant & minimal left alignment */
+.nd-wrapper-axis {
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 56px;
+  z-index: 9999;
+  background: transparent;
+  box-sizing: border-box;
+}
 
-function App() {
-  // Default to workspace view on initial load
-  const [currentSection, setCurrentSection] = useState<string>('workspace');
+/* --- DOCK CONTAINER (Minimalist Monochrome Premium Glass) --- */
+.nd-dock {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 48px;
+  height: 360px;
+  padding: 16px 0;
+  border-radius: 16px;
+  box-sizing: border-box;
+  
+  background: rgba(15, 15, 17, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Minimalist border highlight on hover, no size expand for maximum simplicity */
+.nd-dock-expanded {
+  background: rgba(10, 10, 12, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* Stack layout for item positions */
+.nd-items-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.nd-item-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Capsule framing */
+.nd-capsule-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.nd-icon-fluid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px; /* Clean minimalist squircle */
+  color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+  border: 1px solid transparent;
+  z-index: 2;
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nd-icon {
+  width: 16px;
+  height: 16px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- STATE 3: ITEM HOVER (Minimalist B&W feedback) --- */
+.nd-row-hovered .nd-icon-fluid {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nd-row-hovered .nd-icon {
+  transform: scale(1.05);
+}
+
+/* --- PREMIUM MINIMAL TOOLTIPS --- */
+.nd-tooltip {
+  position: absolute;
+  left: calc(100% + 16px);
+  top: 50%;
+  transform: translateY(-50%) scale(0.96);
+  background: #0d0d0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 10px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nd-tooltip-text {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.nd-row-hovered .nd-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+/* Decorative hardware pins */
+.nd-hardware-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 10px;
+}
+
+.nd-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.nd-dock-expanded .nd-dot {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- ACTIVE STATE MINIMAL INDICATOR PILL --- */
+.nd-active-indicator {
+  position: absolute;
+  left: 2px;
+  width: 2px;
+  height: 0px;
+  border-radius: 99px;
+  background: #ffffff;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+.nd-row-active .nd-active-indicator {
+  height: 16px;
+  opacity: 1;
+}
+
+.nd-row-active .nd-icon-fluid {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Footer Section settings button */
+.nd-footer-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.nd-footer-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nd-footer-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: rotate(30deg);
+}
+
+.nd-footer-btn svg {
+  width: 15px;
+  height: 15px;
+}
+</file>
+
+<file path="nexel-ide/src/components/NavDock.tsx">
+import React, { useState } from 'react';
+import './NavDock.css';
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+}
+
+interface NavDockProps {
+  activeSection: string;
+  onSelect: (id: string) => void;
+  sidebarCollapsed?: boolean;
+}
+
+export const NavDock: React.FC<NavDockProps> = ({ activeSection, onSelect, sidebarCollapsed }) => {
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isDockHovered, setIsDockHovered] = useState<boolean>(false);
+
+  const navItems: NavItem[] = [
+    {
+      id: 'workspace',
+      label: 'Workspace Explorer',
+      icon: (
+        <svg className="nd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'judge',
+      label: 'Judge System',
+      icon: (
+        <svg className="nd-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22V13m0 0l-4 2m4-2l4 2" />
+          <path d="M12 7V2m0 5a3 3 0 1 0 0 6 3 3 0 1 0 0-6z" />
+          <path d="M5 17h14M3 22h18" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
-    <div style={{ 
-      backgroundColor: '#0B0B0D', 
-      minHeight: '100vh',
-      color: '#f3f4f6',
-      display: 'flex',
-      flexDirection: 'row',
-      overflow: 'hidden'
-    }}>
-      {/* Dynamic Navigation Dock Interface */}
-      <NavDock 
-        activeSection={currentSection} 
-        onSelect={(id) => setCurrentSection(id)} 
-      />
+    <div className="nd-wrapper-axis">
+      <div 
+        className={`nd-dock ${isDockHovered ? 'nd-dock-expanded' : ''}`}
+        onMouseEnter={() => setIsDockHovered(true)}
+        onMouseLeave={() => {
+          setIsDockHovered(false);
+          setHoveredItem(null);
+        }}
+      >
+        {/* Top Accent Hardware Pin with Pulse effect */}
+        <div className="nd-hardware-pin top-pin">
+          <div className="nd-dot pulsing" />
+        </div>
 
-      {/* Main App Workspace Canvas */}
-      <div style={{ 
-        flexGrow: 1,
-        padding: '32px 32px 32px 76px', 
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start'
-      }}>
-        {/* Conditional Panel Mapping Layer */}
-        {currentSection === 'workspace' && (
-          <div className="panel-fade-in" style={{ width: '100%' }}>
-            {/* Drop your File Explorer tree component or text editors right here */}
-            <p style={{ color: '#4b5563', fontSize: '13px' }}>Workspace Explorer Layer Active</p>
-          </div>
-        )}
+        {/* Navigation Core stack */}
+        <div className="nd-items-stack">
+          {navItems.map((item) => {
+            const isItemHovered = hoveredItem === item.id;
+            const isItemActive = activeSection === item.id && !(item.id === 'workspace' && sidebarCollapsed);
 
-        {currentSection === 'judge' && (
-          <div className="panel-fade-in" style={{ width: '100%' }}>
-            {/* Drop your test runner, competitive submission logs, or analytics grid right here */}
-            <p style={{ color: '#4b5563', fontSize: '13px' }}>Judge Compiler Panel Active</p>
+            return (
+              <div
+                key={item.id}
+                className={`nd-item-row ${isItemHovered ? 'nd-row-hovered' : ''} ${isItemActive ? 'nd-row-active' : ''}`}
+                onMouseEnter={() => setHoveredItem(item.id)}
+                onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => onSelect(item.id)}
+              >
+                {/* Neon Tube Active Indicator Pillar */}
+                <div className="nd-active-indicator" />
+
+                <div className="nd-capsule-container">
+                  <div className="nd-glow-layer" />
+                  <div className="nd-icon-fluid">
+                    {item.icon}
+                  </div>
+                </div>
+
+                {/* Cyberpunk Glass Tooltip */}
+                <div className="nd-tooltip">
+                  <span className="nd-tooltip-text">{item.label}</span>
+                  <div className="nd-tooltip-indicator" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Gear/Settings Action Button */}
+        <div className="nd-footer-action">
+          <button 
+            className="nd-footer-btn" 
+            title="IDE Preferences"
+            onClick={() => alert("Nexel IDE v1.0.0 Preferences Panel - Design overhauled with premium dark themes.")}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          
+          <div className="nd-hardware-pin bottom-pin">
+            <div className="nd-dot" />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
+};
+
+export default NavDock;
+</file>
+
+<file path="nexel-ide/src/index.css">
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;800&display=swap');
+
+:root {
+  --sans: 'Outfit', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Outfit', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-export default App;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0B0B0D;
+}
+
+/* Redesigned full-bleed layout core for an elegant desktop app shell */
+#root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+h1, h2, p {
+  margin: 0;
+}
 </file>
 
 <file path="nexel-ide/tsconfig.app.json">
@@ -1373,6 +4257,180 @@ export default App;
   },
   "include": ["src", "main.cjs", "preload.cjs"]
 }
+</file>
+
+<file path="nexel-ide/src/App.tsx">
+import { useState, useEffect } from 'react';
+import { NavDock } from './components/NavDock';
+import { Explorer } from './components/Explorer';
+import { Editor } from './components/Editor';
+import { TitleBar } from './components/TitleBar';
+import { Terminal } from './components/Terminal';
+import './App.css';
+
+function App() {
+  const [currentSection, setCurrentSection] = useState<string>('workspace');
+  const [activeFilePath, setActiveFilePath] = useState<string | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [isHoverRevealed, setIsHoverRevealed] = useState<boolean>(false);
+  const [terminalVisible, setTerminalVisible] = useState<boolean>(false);
+
+  const handleFileSelect = (filePath: string) => {
+    setActiveFilePath(filePath);
+  };
+
+  const handleCloseFile = () => {
+    setActiveFilePath(null);
+  };
+
+  const handleSelectSection = (id: string) => {
+    if (id === 'workspace') {
+      if (currentSection === 'workspace') {
+        // Toggle collapse state when clicking active workspace icon
+        setSidebarCollapsed(!sidebarCollapsed);
+        setIsHoverRevealed(false);
+      } else {
+        setCurrentSection('workspace');
+        setSidebarCollapsed(false);
+      }
+    } else {
+      setCurrentSection(id);
+    }
+  };
+
+  // Toggle sidebar event hook
+  useEffect(() => {
+    const handleToggle = () => {
+      setSidebarCollapsed(prev => !prev);
+      setIsHoverRevealed(false);
+    };
+    window.addEventListener('nx-toggle-sidebar', handleToggle);
+    return () => window.removeEventListener('nx-toggle-sidebar', handleToggle);
+  }, []);
+
+  // Terminal toggle and spawn event hooks
+  useEffect(() => {
+    const handleOpen = () => setTerminalVisible(true);
+    const handleToggle = () => setTerminalVisible(prev => !prev);
+
+    window.addEventListener('nx-open-terminal', handleOpen);
+    window.addEventListener('nx-toggle-terminal', handleToggle);
+
+    return () => {
+      window.removeEventListener('nx-open-terminal', handleOpen);
+      window.removeEventListener('nx-toggle-terminal', handleToggle);
+    };
+  }, []);
+
+  return (
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      width: '100vw', 
+      height: '100vh', 
+      overflow: 'hidden', 
+      backgroundColor: '#0B0B0D' 
+    }}>
+      <TitleBar />
+
+      <div style={{ 
+        flexGrow: 1,
+        width: '100vw',
+        height: 'calc(100vh - 34px)',
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        {/* Invisible Hover Trigger zone at absolute left edge when NavDock is collapsed */}
+        {sidebarCollapsed && (
+          <div 
+            className="nx-navdock-hover-trigger"
+            onMouseEnter={() => setIsHoverRevealed(true)}
+            style={{
+              position: 'fixed',
+              left: 0,
+              top: '34px',
+              width: '24px',
+              height: 'calc(100vh - 34px)',
+              zIndex: 9999,
+              background: 'transparent'
+            }}
+          />
+        )}
+
+        {/* Floating high-fidelity glass dock layer (collapses off-screen, reveals on hover) */}
+        <div 
+          className={`nx-navdock-wrapper-container ${sidebarCollapsed ? 'collapsed' : ''} ${isHoverRevealed ? 'hover-revealed' : ''}`}
+          onMouseLeave={() => setIsHoverRevealed(false)}
+          style={{
+            height: 'calc(100vh - 34px)',
+            zIndex: 10000,
+            position: 'fixed',
+            top: '34px',
+            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        >
+          <NavDock 
+            activeSection={currentSection} 
+            onSelect={handleSelectSection} 
+            sidebarCollapsed={sidebarCollapsed}
+          />
+        </div>
+
+        {/* Workspace Panel Stream (Collapses completely on toggle, no hover reveal) */}
+        <div 
+          className={`nx-sidebar-container ${sidebarCollapsed ? 'collapsed' : ''}`}
+          style={{ 
+            display: currentSection === 'workspace' ? 'flex' : 'none',
+            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            height: '100%'
+          }}
+        >
+          <Explorer 
+            onFileSelect={handleFileSelect} 
+            activeFilePath={activeFilePath}
+          />
+        </div>
+
+        {/* Main UI Text Editor Core Canvas */}
+        <div style={{ 
+          flexGrow: 1,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          boxSizing: 'border-box',
+          background: '#0B0B0D',
+          position: 'relative'
+        }}>
+          {/* Editor panel is always mounted but toggled using CSS to prevent vanishing tabs */}
+          <div style={{ display: currentSection === 'workspace' ? 'flex' : 'none', width: '100%', height: '100%' }}>
+            <Editor 
+              activeFilePath={activeFilePath} 
+              onFileSelect={handleFileSelect}
+              onCloseFile={handleCloseFile}
+            />
+          </div>
+
+          {currentSection === 'judge' && (
+            <div className="panel-fade-in" style={{ padding: '24px', width: '100%' }}>
+              <p style={{ color: '#8c95a5', fontSize: '13px', fontFamily: 'sans-serif' }}>
+                Judge Compiler Panel Active
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+      <Terminal 
+        visible={terminalVisible} 
+        onClose={() => setTerminalVisible(false)} 
+        sidebarCollapsed={sidebarCollapsed}
+      />
+    </div>
+  );
+}
+
+export default App;
 </file>
 
 </files>

@@ -1,0 +1,386 @@
+/* --- PREMIUM MINIMAL MONOCHROME MONACO EDITOR CANVAS --- */
+.nx-editor-canvas {
+  flex-grow: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #050507;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Floating aesthetic minimal active tabs bar container */
+.nx-floating-tabbar-container {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+  pointer-events: none; /* Let clicks pass through outside the bar */
+}
+
+.nx-floating-tabbar {
+  pointer-events: auto; /* Re-enable clicks inside the bar */
+  display: flex;
+  align-items: center;
+  background: rgba(13, 13, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 4px 8px;
+  height: 38px;
+  box-sizing: border-box;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  max-width: 90%;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-floating-tabbar:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(10, 10, 12, 0.92);
+}
+
+.nx-tabs-scroll-stack {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 500px;
+}
+
+.nx-tabs-scroll-stack::-webkit-scrollbar {
+  display: none; /* Hide scrollbars inside floating bar */
+}
+
+/* Minimalist floating tab styling */
+.nx-editor-tab {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  min-width: 80px;
+  max-width: 140px;
+}
+
+.nx-editor-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.nx-editor-tab.active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.nx-tab-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+.nx-editor-tab.active .nx-tab-title {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Tab Close button */
+.nx-tab-close-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s;
+}
+
+.nx-tab-close-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Unsaved dirty indicator */
+.nx-dirty-indicator-glow {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  margin-right: 6px;
+}
+
+/* Toolbar global controls inside floating bar */
+.nx-editor-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 8px;
+  margin-left: 4px;
+}
+
+.nx-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 2.5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.nx-toolbar-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-toolbar-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.nx-toolbar-btn.auto-save.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nx-auto-save-led {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.2s;
+}
+
+.nx-toolbar-btn.auto-save.active .nx-auto-save-led {
+  background: #ffffff;
+}
+
+/* Monaco Workspace Wrapper Panel */
+.nx-editor-workspace-area {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  background: #050507;
+  padding-top: 56px; /* Offsets Monaco scroll under the floating bar perfectly */
+  box-sizing: border-box;
+}
+
+/* Welcome Backdrop style */
+.nx-editor-welcome-backdrop {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050507;
+}
+
+.nx-welcome-glass-plate {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 32px;
+  border-radius: 12px;
+  max-width: 400px;
+}
+
+.nx-welcome-branding-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nx-welcome-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  display: block;
+}
+
+.nx-welcome-headline {
+  position: absolute;
+  bottom: 20px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  letter-spacing: 0.35em;
+  color: #ffffff;
+  margin: 0;
+  text-indent: 0.35em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.nx-welcome-subtitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0 0 28px 0;
+}
+
+.nx-shortcut-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.nx-shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: -apple-system, sans-serif;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-shortcut-row kbd {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  padding: 2px 6px;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+/* Footer Metrics styling */
+.nx-editor-footer-metrics {
+  height: 22px;
+  background: #0B0B0D;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-family: -apple-system, sans-serif;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.3);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.nx-footer-path {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
+}
+
+.nx-footer-right-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nx-footer-metric-pill {
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.nx-footer-metric-pill.active {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Minimalist floating tab dropdown action menu */
+.nx-tab-menu-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+
+.nx-tab-menu-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.nx-tab-menu-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nx-tab-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: rgba(13, 13, 16, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    0 0 15px rgba(255, 255, 255, 0.02);
+  width: 130px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: nx-fade-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-dropdown-item {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.nx-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  padding-left: 14px;
+}
+
+.nx-dropdown-item.warning {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-dropdown-item.warning:hover {
+  color: #ff6e6e;
+  background: rgba(255, 110, 110, 0.05);
+}

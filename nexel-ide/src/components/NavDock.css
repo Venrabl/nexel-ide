@@ -1,56 +1,44 @@
-/* Central alignment axis - ensures left & right expansion are perfectly symmetrical */
+/* Central alignment axis - elegant & minimal left alignment */
 .nd-wrapper-axis {
   position: fixed;
-  left: 12px; /* Tightly tucked into the absolute left boundary edge */
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 64px; /* Matches the maximum expanded width perfectly to keep things locked */
+  width: 56px;
   z-index: 9999;
   background: transparent;
   box-sizing: border-box;
 }
 
-/* --- STATE 1: IDLE (Subtly larger baseline width) --- */
+/* --- DOCK CONTAINER (Minimalist Monochrome Premium Glass) --- */
 .nd-dock {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 42px; /* Slightly punchier baseline size */
-  height: 340px; /* Balanced ratio, no vertical stretching */
+  width: 48px;
+  height: 360px;
   padding: 16px 0;
-  border-radius: 100px;
+  border-radius: 16px;
   box-sizing: border-box;
   
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(15, 15, 17, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.02);
-
-  /* Clean transitions on the width ensures smooth bilateral pop out */
-  transition: 
-    width 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    background 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-    box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- STATE 2: DOCK HOVER (Highly controlled, subtle scale up) --- */
+/* Minimalist border highlight on hover, no size expand for maximum simplicity */
 .nd-dock-expanded {
-  width: 64px; /* Scaled way down from previous build to remain micro-sized */
-  background: linear-gradient(180deg, rgba(20, 22, 28, 0.65) 0%, rgba(12, 13, 17, 0.8) 100%);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.75),
-    0 0 30px rgba(150, 165, 255, 0.04),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 12, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
 }
 
 /* Stack layout for item positions */
@@ -58,7 +46,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 32px;
+  gap: 24px;
   width: 100%;
 }
 
@@ -87,74 +75,39 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0);
+  border-radius: 8px; /* Clean minimalist squircle */
+  color: rgba(255, 255, 255, 0.35);
+  background: transparent;
   border: 1px solid transparent;
   z-index: 2;
   box-sizing: border-box;
-  
-  transition: 
-    width 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    height 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    border-radius 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-    background 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nd-icon {
-  width: 17px;
-  height: 17px;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 16px;
+  height: 16px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Ambient inner glow ring mesh */
-.nd-glow-layer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0px;
-  height: 0px;
-  background: radial-gradient(circle, rgba(155, 165, 255, 0.2) 0%, rgba(155, 165, 255, 0) 70%);
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-  transition: width 0.35s ease, height 0.35s ease, opacity 0.35s ease;
-}
-
-/* --- STATE 3: ITEM HOVER (Organic squircle interpolation) --- */
+/* --- STATE 3: ITEM HOVER (Minimalist B&W feedback) --- */
 .nd-row-hovered .nd-icon-fluid {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px; /* Organic Squircle shape */
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-}
-
-.nd-row-hovered .nd-glow-layer {
-  width: 80px;
-  height: 80px;
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .nd-row-hovered .nd-icon {
   transform: scale(1.05);
 }
 
-/* --- HARDWARE TOOLTIP DESIGN --- */
+/* --- PREMIUM MINIMAL TOOLTIPS --- */
 .nd-tooltip {
   position: absolute;
   left: calc(100% + 16px);
   top: 50%;
-  transform: translateY(-50%) scale(0.95);
-  background: rgba(18, 19, 23, 0.85);
+  transform: translateY(-50%) scale(0.96);
+  background: #0d0d0f;
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 6px 10px;
   border-radius: 6px;
@@ -162,26 +115,22 @@
   pointer-events: none;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: 
-    opacity 0.2s cubic-bezier(0.25, 1, 0.5, 1),
-    transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nd-tooltip-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
-/* Reveal Tooltip seamlessly on active row hover */
 .nd-row-hovered .nd-tooltip {
   opacity: 1;
   transform: translateY(-50%) scale(1);
-  transition-delay: 0.05s;
 }
 
 /* Decorative hardware pins */
@@ -198,43 +147,67 @@
   height: 3px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.15);
-  transition: background-color 0.35s ease, transform 0.35s ease;
+  transition: all 0.3s ease;
 }
 
 .nd-dock-expanded .nd-dot {
-  background-color: rgba(155, 170, 255, 0.6);
-  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
-/* --- ACTIVE STATE INDICATOR PILL --- */
+/* --- ACTIVE STATE MINIMAL INDICATOR PILL --- */
 .nd-active-indicator {
   position: absolute;
-  left: -2px; /* Tucked slightly into the left edge margins */
-  width: 3px;
+  left: 2px;
+  width: 2px;
   height: 0px;
   border-radius: 99px;
-  background: #c084fc; /* Vibrant purple indicator */
-  box-shadow: 0 0 10px #c084fc, 0 0 20px rgba(192, 132, 252, 0.4);
+  background: #ffffff;
   opacity: 0;
-  transition: 
-    height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-    opacity 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 5;
 }
 
-/* Base Active State Layout */
 .nd-row-active .nd-active-indicator {
-  height: 16px; /* Spawns a nice, sharp dynamic micro-bar */
+  height: 16px;
   opacity: 1;
 }
 
-/* Subtle persistence highlight when an item is active but not explicitly hovered */
 .nd-row-active .nd-icon-fluid {
-  color: rgba(255, 255, 255, 0.85);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Adjust active bar sizing when the dock itself swells open */
-.nd-dock-expanded .nd-row-active .nd-active-indicator {
-  height: 24px;
-  left: 2px;
+/* Footer Section settings button */
+.nd-footer-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.nd-footer-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nd-footer-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: rotate(30deg);
+}
+
+.nd-footer-btn svg {
+  width: 15px;
+  height: 15px;
 }
