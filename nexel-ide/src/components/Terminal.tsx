@@ -123,7 +123,7 @@ export const Terminal: React.FC<TerminalProps> = ({ visible, onClose, sidebarCol
   return (
     <div 
       className="nx-terminal-panel"
-      style={{ left: sidebarCollapsed ? '0px' : '260px' }}
+      style={{ left: sidebarCollapsed ? '0px' : '290px' }}
     >
       <div className="nx-terminal-header">
         <div className="nx-term-header-left">

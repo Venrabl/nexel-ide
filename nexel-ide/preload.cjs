@@ -25,5 +25,9 @@ contextBridge.exposeInMainWorld('nexelAPI', {
     // Clear previous listeners to avoid double listener leaks
     ipcRenderer.removeAllListeners('terminal:data');
     ipcRenderer.on('terminal:data', (event, data) => callback(data));
-  }
+  },
+
+  // Competitive Programming Judge Integration
+  runJudge: (filePath, testCases, timeLimit, memoryLimit) => 
+    ipcRenderer.invoke('judge:run', filePath, testCases, timeLimit, memoryLimit)
 });

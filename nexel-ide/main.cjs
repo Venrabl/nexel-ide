@@ -192,6 +192,24 @@ function createWindow() {
     return true;
   });
 
+  // Competitive Programming Judge IPC Pipeline
+  ipcMain.handle('judge:run', async (event, filePath, testCases, timeLimit, memoryLimit) => {
+    try {
+      const judgeRunner = require('./src/judge-backend/judge-runner.cjs');
+      const results = await judgeRunner.runSuite(filePath, testCases, timeLimit, memoryLimit);
+      return results;
+    } catch (err) {
+      console.error("Judge execution error:", err);
+      return testCases.map(tc => ({
+        id: tc.id,
+        verdict: 'RE',
+        metrics: { time: 0, memory: 0, exitCode: 1 },
+        actual: err.message,
+        diff: err.message
+      }));
+    }
+  });
+
   const startUrl = process.env.ELECTRON_START_URL || 'http://localhost:5173';
   mainWindow.loadURL(startUrl);
 

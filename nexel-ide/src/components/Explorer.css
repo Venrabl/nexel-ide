@@ -1,7 +1,7 @@
 /* --- COLLAPSIBLE SIDEBAR CONTAINER (Standard solid collapse) --- */
 .nx-sidebar-container {
-  width: 260px;
-  min-width: 260px;
+  width: 290px;
+  min-width: 290px;
   height: 100vh;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
               opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
@@ -12,7 +12,7 @@
 .nx-sidebar-container.collapsed {
   width: 0px !important;
   min-width: 0px !important;
-  transform: translateX(-260px);
+  transform: translateX(-290px);
   opacity: 0;
   pointer-events: none;
 }
@@ -38,7 +38,7 @@
 
 /* --- PREMIUM MINIMAL MONOCHROME WORKSPACE EXPLORER --- */
 .nx-explorer-wrapper {
-  width: 260px;
+  width: 290px;
   height: 100vh;
   box-sizing: border-box;
   display: flex;

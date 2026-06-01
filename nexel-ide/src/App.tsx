@@ -4,6 +4,7 @@ import { Explorer } from './components/Explorer';
 import { Editor } from './components/Editor';
 import { TitleBar } from './components/TitleBar';
 import { Terminal } from './components/Terminal';
+import { JudgeSystem } from './components/JudgeSystem';
 import './App.css';
 
 function App() {
@@ -22,13 +23,13 @@ function App() {
   };
 
   const handleSelectSection = (id: string) => {
-    if (id === 'workspace') {
-      if (currentSection === 'workspace') {
-        // Toggle collapse state when clicking active workspace icon
+    if (id === 'workspace' || id === 'judge') {
+      if (currentSection === id) {
+        // Toggle collapse state when clicking active workspace or judge icon
         setSidebarCollapsed(!sidebarCollapsed);
         setIsHoverRevealed(false);
       } else {
-        setCurrentSection('workspace');
+        setCurrentSection(id);
         setSidebarCollapsed(false);
       }
     } else {
@@ -120,15 +121,20 @@ function App() {
         <div 
           className={`nx-sidebar-container ${sidebarCollapsed ? 'collapsed' : ''}`}
           style={{ 
-            display: currentSection === 'workspace' ? 'flex' : 'none',
+            display: (currentSection === 'workspace' || currentSection === 'judge') ? 'flex' : 'none',
             transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             height: '100%'
           }}
         >
-          <Explorer 
-            onFileSelect={handleFileSelect} 
-            activeFilePath={activeFilePath}
-          />
+          <div style={{ display: currentSection === 'workspace' ? 'flex' : 'none', height: '100%', width: '100%' }}>
+            <Explorer 
+              onFileSelect={handleFileSelect} 
+              activeFilePath={activeFilePath}
+            />
+          </div>
+          <div style={{ display: currentSection === 'judge' ? 'flex' : 'none', height: '100%', width: '100%' }}>
+            <JudgeSystem activeFilePath={activeFilePath} />
+          </div>
         </div>
 
         {/* Main UI Text Editor Core Canvas */}
@@ -142,7 +148,7 @@ function App() {
           position: 'relative'
         }}>
           {/* Editor panel is always mounted but toggled using CSS to prevent vanishing tabs */}
-          <div style={{ display: currentSection === 'workspace' ? 'flex' : 'none', width: '100%', height: '100%' }}>
+          <div style={{ display: (currentSection === 'workspace' || currentSection === 'judge') ? 'flex' : 'none', width: '100%', height: '100%' }}>
             <Editor 
               activeFilePath={activeFilePath} 
               onFileSelect={handleFileSelect}
@@ -150,13 +156,7 @@ function App() {
             />
           </div>
 
-          {currentSection === 'judge' && (
-            <div className="panel-fade-in" style={{ padding: '24px', width: '100%' }}>
-              <p style={{ color: '#8c95a5', fontSize: '13px', fontFamily: 'sans-serif' }}>
-                Judge Compiler Panel Active
-              </p>
-            </div>
-          )}
+
         </div>
       </div>
       <Terminal 

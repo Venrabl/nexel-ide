@@ -21,6 +21,20 @@ export interface INexelAPI {
   writeTerminal: (data: string) => void;
   resizeTerminal: (cols: number, rows: number) => void;
   onTerminalData: (callback: (data: string) => void) => void;
+  runJudge: (
+    filePath: string,
+    testCases: Array<{ id: number; input: string; expected: string }>,
+    timeLimit?: number,
+    memoryLimit?: number
+  ) => Promise<Array<{
+    id: number;
+    verdict: 'AC' | 'WA' | 'TLE' | 'MLE' | 'RE';
+    metrics: { time: number; memory: number; exitCode: number | null };
+    actual: string;
+    expected?: string;
+    passed?: boolean;
+    diff?: string;
+  }>>;
 }
 
 declare global {
