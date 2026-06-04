@@ -178,3 +178,78 @@
   background: #e81123 !important;
   color: #ffffff !important;
 }
+
+/* --- TITLEBAR SNIPPETS CONTROLS --- */
+.nx-titlebar-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  margin-right: 14px;
+}
+
+.nx-titlebar-toggle-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+
+.nx-titlebar-switch-track {
+  width: 28px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-titlebar-switch-track.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.nx-titlebar-switch-thumb {
+  width: 9px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-titlebar-switch-track.active .nx-titlebar-switch-thumb {
+  left: 15px;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+.nx-titlebar-snippets-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 16px;
+  text-transform: uppercase;
+}
+
+.nx-titlebar-snippets-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.03);
+}

@@ -576,3 +576,40 @@
   100% { opacity: 1; }
 }
 
+/* --- Dopamine AC and WA Animations --- */
+@keyframes green-glow-wash {
+  0% {
+    box-shadow: 0 0 0 rgba(52, 211, 153, 0);
+    border-color: rgba(255, 255, 255, 0.03);
+  }
+  20% {
+    box-shadow: 0 0 35px rgba(52, 211, 153, 0.4), inset 0 0 20px rgba(52, 211, 153, 0.15);
+    border-color: rgba(52, 211, 153, 0.4);
+    background: rgba(52, 211, 153, 0.02);
+  }
+  80% {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.15), inset 0 0 10px rgba(52, 211, 153, 0.08);
+    border-color: rgba(52, 211, 153, 0.25);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(52, 211, 153, 0);
+    border-color: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.nx-judge-wrapper.ac-celebrate-glow {
+  animation: green-glow-wash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes crisp-shake {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-4px); }
+  30%, 60% { transform: translateX(4px); }
+}
+
+.nx-judge-metrics-panel.wa-shake {
+  animation: crisp-shake 0.4s ease-in-out;
+  border-color: rgba(248, 113, 113, 0.5) !important;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.25) !important;
+}
+

@@ -4,6 +4,7 @@ import './TitleBar.css';
 
 export const TitleBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [enableSnippets, setEnableSnippets] = useState<boolean>(() => localStorage.getItem('enable-snippets') !== 'false');
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menus when clicking outside
@@ -52,6 +53,10 @@ export const TitleBar: React.FC = () => {
     Terminal: [
       { label: 'New Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-terminal')); } },
       { label: 'Toggle Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-toggle-terminal')); } },
+    ],
+    Options: [
+      { label: 'C++ Template...', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-template-settings')); } },
+      { label: 'Snippets Manager...', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-snippets')); } }
     ],
     Help: [
       { label: 'About Nexel IDE', action: () => alert('Nexel IDE v1.0.0 - Built with React + TypeScript + Monaco') },
@@ -113,6 +118,33 @@ export const TitleBar: React.FC = () => {
       </div>
 
       <div className="nx-titlebar-right">
+        {/* Snippets Toggle Switch */}
+        <div className="nx-titlebar-toggle-wrapper" title="Toggle Snippets Autocomplete">
+          <span className="nx-titlebar-toggle-label">Snippets</span>
+          <div 
+            className={`nx-titlebar-switch-track ${enableSnippets ? 'active' : ''}`}
+            onClick={() => {
+              const nextState = !enableSnippets;
+              setEnableSnippets(nextState);
+              localStorage.setItem('enable-snippets', String(nextState));
+              window.dispatchEvent(new CustomEvent('nx-snippets-toggled', { detail: nextState }));
+            }}
+          >
+            <div className="nx-titlebar-switch-thumb" />
+          </div>
+        </div>
+
+        {/* Snippets List Button */}
+        <button 
+          className="nx-titlebar-snippets-btn" 
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('nx-open-snippets'));
+          }}
+          title="Show Available Snippets List"
+        >
+          Snippets List
+        </button>
+
         <button 
           className="nx-win-ctrl-btn minimize" 
           title="Minimize" 

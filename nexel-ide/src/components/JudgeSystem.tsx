@@ -25,6 +25,8 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
   const [activeTCId, setActiveTCId] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'input' | 'expected' | 'actual' | 'diff'>('input');
   const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [showAcEffect, setShowAcEffect] = useState<boolean>(false);
+  const [showWaEffect, setShowWaEffect] = useState<boolean>(false);
 
   const activeTC = testCases.find(tc => tc.id === activeTCId) || testCases[0];
 
@@ -101,6 +103,19 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
         return tc;
       }));
 
+      // Check results for AC / WA to trigger celebrations
+      const allAc = results.length > 0 && results.every(r => r.verdict === 'AC');
+      const anyWa = results.some(r => r.verdict === 'WA' || r.verdict === 'TLE' || r.verdict === 'MLE' || r.verdict === 'RE');
+
+      if (allAc) {
+        setShowAcEffect(true);
+        window.dispatchEvent(new CustomEvent('nx-ac-celebration'));
+        setTimeout(() => setShowAcEffect(false), 1500);
+      } else if (anyWa) {
+        setShowWaEffect(true);
+        setTimeout(() => setShowWaEffect(false), 800);
+      }
+
       // Auto-switch to actual output tab to display results
       setActiveTab('actual');
 
@@ -128,7 +143,7 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
   };
 
   return (
-    <div className="nx-judge-wrapper">
+    <div className={`nx-judge-wrapper ${showAcEffect ? 'ac-celebrate-glow' : ''}`}>
       <div className="nx-judge-header">
         <span className="nx-judge-title">NEXEL JUDGE</span>
       </div>
@@ -274,7 +289,7 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
           activeTC.verdict === 'AC' ? 'passed' : ''
         } ${
           activeTC.verdict && activeTC.verdict !== 'AC' && activeTC.verdict !== 'IDLE' && activeTC.verdict !== 'RUNNING' ? 'failed' : ''
-        }`}>
+        } ${showWaEffect ? 'wa-shake' : ''}`}>
           {activeTC.verdict === 'RUNNING' ? (
             <span className="nx-metric-chip running">RUNNING...</span>
           ) : (

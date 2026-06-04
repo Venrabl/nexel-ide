@@ -42,7 +42,7 @@ class JudgeRunner {
       if (ext === '.cpp' || ext === '.cc') {
         const outBinName = isWin ? `${baseName}.exe` : baseName;
         const outExe = path.join(workspaceDir, outBinName);
-        await this.compileCpp(filePath, outExe, 5000);
+        await this.compileCpp(filePath, outExe, 15000);
         executablePath = outExe;
         isCompiled = true;
       } else if (ext === '.java') {
@@ -59,7 +59,7 @@ class JudgeRunner {
         const copiedJavaFile = path.join(workspaceDir, `${runClassName}.java`);
         await fs.copyFile(filePath, copiedJavaFile);
 
-        await this.compileJava(copiedJavaFile, workspaceDir, 5000);
+        await this.compileJava(copiedJavaFile, workspaceDir, 15000);
         executablePath = workspaceDir; // Class folder
         isCompiled = true;
       }
@@ -102,7 +102,7 @@ class JudgeRunner {
 
   compileCpp(src, dest, compileTimeout) {
     return new Promise((resolve, reject) => {
-      const gpp = spawn('g++', ['-O3', '-std=c++17', src, '-o', dest]);
+      const gpp = spawn('g++', ['-std=c++17', src, '-o', dest]);
       let errData = '';
       
       const timer = setTimeout(() => {

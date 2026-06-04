@@ -384,6 +384,12 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
         if (inlineInput.nodePath) {
           forceOpenPaths.add(inlineInput.nodePath.replace(/\\/g, '/'));
         }
+        if (value.toLowerCase().endsWith('.cpp')) {
+          const cppTemplate = localStorage.getItem('cpp-template');
+          if (cppTemplate) {
+            await window.nexelAPI.writeFileContent(createdPath, cppTemplate);
+          }
+        }
       } else if (inlineInput.mode === 'new-folder') {
         createdPath = await window.nexelAPI.createFolder(inlineInput.nodePath, value);
         if (inlineInput.nodePath) {
@@ -484,7 +490,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
   // Tree recursive rendering
   const renderTree = (nodes: FileNode[], depth = 0) => {
     return nodes.map((node, index) => {
-      const isSelected = activeFilePath === node.path || (lastSelectedNode && lastSelectedNode.path === node.path);
+      const isSelected = activeFilePath === node.path || (lastSelectedNode ? lastSelectedNode.path === node.path : false);
       const isFolder = node.type === 'folder';
 
       // Inline editing element placement

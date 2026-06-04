@@ -13,6 +13,8 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [isHoverRevealed, setIsHoverRevealed] = useState<boolean>(false);
   const [terminalVisible, setTerminalVisible] = useState<boolean>(false);
+  const [templateModalVisible, setTemplateModalVisible] = useState<boolean>(false);
+  const [cppTemplate, setCppTemplate] = useState<string>(() => localStorage.getItem('cpp-template') || '');
 
   const handleFileSelect = (filePath: string) => {
     setActiveFilePath(filePath);
@@ -59,6 +61,16 @@ function App() {
       window.removeEventListener('nx-open-terminal', handleOpen);
       window.removeEventListener('nx-toggle-terminal', handleToggle);
     };
+  }, []);
+
+  // Options C++ template event hook
+  useEffect(() => {
+    const handleOpenTemplate = () => {
+      setCppTemplate(localStorage.getItem('cpp-template') || '');
+      setTemplateModalVisible(true);
+    };
+    window.addEventListener('nx-open-template-settings', handleOpenTemplate);
+    return () => window.removeEventListener('nx-open-template-settings', handleOpenTemplate);
   }, []);
 
   return (
@@ -164,6 +176,44 @@ function App() {
         onClose={() => setTerminalVisible(false)} 
         sidebarCollapsed={sidebarCollapsed}
       />
+
+      {/* C++ Template Configuration Modal */}
+      {templateModalVisible && (
+        <div className="nx-template-modal-overlay">
+          <div className="nx-template-modal">
+            <div className="nx-template-modal-header">
+              <h2 className="nx-template-modal-title">C++ FILE TEMPLATE</h2>
+              <div className="nx-template-glow-badge">OPTIONS</div>
+            </div>
+            <p className="nx-template-modal-desc">
+              Specify the default boilerplate code to automatically insert when creating any new `.cpp` files. Leave blank to create empty files.
+            </p>
+            <textarea
+              className="nx-template-textarea"
+              value={cppTemplate}
+              onChange={(e) => setCppTemplate(e.target.value)}
+              placeholder={`#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World!" << endl;\n    return 0;\n}`}
+            />
+            <div className="nx-template-modal-actions">
+              <button 
+                className="nx-template-modal-btn cancel"
+                onClick={() => setTemplateModalVisible(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="nx-template-modal-btn save"
+                onClick={() => {
+                  localStorage.setItem('cpp-template', cppTemplate);
+                  setTemplateModalVisible(false);
+                }}
+              >
+                Save Boilerplate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

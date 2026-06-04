@@ -384,3 +384,277 @@
   color: #ff6e6e;
   background: rgba(255, 110, 110, 0.05);
 }
+
+/* Premium Sliding Switch Toggle */
+.nx-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  margin-right: 4px;
+}
+
+.nx-toggle-label {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nx-switch-track {
+  width: 32px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-switch-track.active {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+.nx-switch-thumb {
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-switch-track.active .nx-switch-thumb {
+  left: 15px;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.nx-toolbar-btn.snippets {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 4px;
+}
+
+.nx-toolbar-btn.snippets:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.03);
+}
+
+/* --- SNIPPETS VIEWER COMPONENT --- */
+.nx-snippets-viewer {
+  width: 100%;
+  height: 100%;
+  padding: 24px 32px;
+  background: #050507;
+  color: #e2e3e5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.nx-snippets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 16px;
+  gap: 16px;
+}
+
+.nx-snippets-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.nx-snippets-subtitle {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+}
+
+.nx-snippets-search {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #ffffff;
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  padding: 5px 12px;
+  width: 250px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.nx-snippets-search:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.05);
+}
+
+.nx-snippets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 16px;
+  padding-bottom: 40px;
+}
+
+.nx-snippet-card {
+  background: rgba(15, 15, 18, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nx-snippet-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(20, 20, 24, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.nx-snippet-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nx-snippet-prefix-badge {
+  font-family: 'Consolas', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.nx-snippet-desc {
+  font-family: -apple-system, sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nx-snippet-copy-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: -apple-system, sans-serif;
+  font-size: 9.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nx-snippet-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.nx-snippet-copy-btn.copied {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nx-snippet-code-block {
+  margin: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  font-size: 11.5px;
+  color: #b0c4de;
+  overflow-x: auto;
+  max-height: 150px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.nx-snippets-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-family: -apple-system, sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 40px 0;
+}
+
+/* --- Dopamine AC celebration glows --- */
+@keyframes editor-glow-wash {
+  0% {
+    box-shadow: 0 0 0 rgba(52, 211, 153, 0);
+  }
+  20% {
+    box-shadow: 0 0 40px rgba(52, 211, 153, 0.35), inset 0 0 20px rgba(52, 211, 153, 0.15);
+  }
+  80% {
+    box-shadow: 0 0 25px rgba(52, 211, 153, 0.15), inset 0 0 10px rgba(52, 211, 153, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(52, 211, 153, 0);
+  }
+}
+
+.nx-editor-canvas.ac-celebrate-glow {
+  animation: editor-glow-wash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes tab-glow-wash {
+  0% {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+  20% {
+    border-color: #34d399;
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+    background: rgba(52, 211, 153, 0.08);
+  }
+  80% {
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.2);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+}
+
+.nx-editor-tab.active.ac-celebrate-glow {
+  animation: tab-glow-wash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}

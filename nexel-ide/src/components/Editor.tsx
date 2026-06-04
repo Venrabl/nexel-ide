@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import MonacoEditor, { loader } from '@monaco-editor/react';
+import MonacoEditor from '@monaco-editor/react';
 import './Editor.css';
 import logoImg from '../assets/logo.png';
 import dataset from '../../dataset.json';
+import snippets from '../../snippets.json';
 
 interface EditorTab {
   filePath: string;
@@ -23,8 +24,9 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   const [activeTabPath, setActiveTabPath] = useState<string | null>(null);
   const [autoSave, setAutoSave] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState<boolean>(false);
+  const [acCelebration, setAcCelebration] = useState<boolean>(false);
   
-  const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSaveIntervalRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
   const completionProviderRef = useRef<any>(null);
 
@@ -35,6 +37,40 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
         completionProviderRef.current.dispose();
       }
     };
+  }, []);
+
+  // Open Snippets Tab global listener
+  useEffect(() => {
+    const handleOpenSnippets = () => {
+      setTabs(prev => {
+        const existing = prev.find(t => t.filePath === 'nexel://snippets');
+        if (existing) {
+          setActiveTabPath('nexel://snippets');
+          return prev;
+        }
+        const newTab: EditorTab = {
+          filePath: 'nexel://snippets',
+          name: 'Code Snippets',
+          content: '',
+          originalContent: '',
+          isDirty: false
+        };
+        setActiveTabPath('nexel://snippets');
+        return [...prev, newTab];
+      });
+    };
+    window.addEventListener('nx-open-snippets', handleOpenSnippets);
+    return () => window.removeEventListener('nx-open-snippets', handleOpenSnippets);
+  }, []);
+
+  // Listen for AC celebration event to flash green glow wash
+  useEffect(() => {
+    const handleAc = () => {
+      setAcCelebration(true);
+      setTimeout(() => setAcCelebration(false), 1500);
+    };
+    window.addEventListener('nx-ac-celebration', handleAc);
+    return () => window.removeEventListener('nx-ac-celebration', handleAc);
   }, []);
 
   const closeAllTabs = () => {
@@ -337,6 +373,26 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
           });
         });
 
+        // Inject snippets from snippets.json if enabled
+        const showSnippets = localStorage.getItem('enable-snippets') !== 'false';
+        if (showSnippets) {
+          Object.entries(snippets).forEach(([_key, val]: [string, any]) => {
+            const bodyStr = Array.isArray(val.body) ? val.body.join('\n') : val.body;
+            suggestions.push({
+              label: val.prefix,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              detail: val.description || 'Snippet',
+              documentation: {
+                value: `**${val.description}**\n\n\`\`\`cpp\n${bodyStr}\n\`\`\``
+              },
+              insertText: bodyStr,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              range: range,
+              sortText: '0001' // snippet has higher sorting priority
+            });
+          });
+        }
+
         return { suggestions };
       }
     });
@@ -353,7 +409,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   };
 
   return (
-    <div className="nx-editor-canvas">
+    <div className={`nx-editor-canvas ${acCelebration ? 'ac-celebrate-glow' : ''}`}>
       {/* Floating Premium aesthetic minimal active tabs bar */}
       {tabs.length > 0 && (
         <div className="nx-floating-tabbar-container">
@@ -362,7 +418,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
               {tabs.map((tab) => (
                 <div 
                   key={tab.filePath} 
-                  className={`nx-editor-tab ${activeTabPath === tab.filePath ? 'active' : ''}`}
+                  className={`nx-editor-tab ${activeTabPath === tab.filePath ? 'active' : ''} ${activeTabPath === tab.filePath && acCelebration ? 'ac-celebrate-glow' : ''}`}
                   onClick={() => {
                     setActiveTabPath(tab.filePath);
                     onFileSelect(tab.filePath);
@@ -436,32 +492,36 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 
       {/* Monaco Code Editor Area */}
       {activeTab ? (
-        <div className="nx-editor-workspace-area">
-          <MonacoEditor
-            height="100%"
-            language={getLanguage(activeTab.name)}
-            value={activeTab.content}
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
-            options={{
-              fontSize: 13,
-              fontFamily: 'Consolas, "Courier New", Courier, monospace',
-              minimap: { enabled: false },
-              scrollbar: {
-                vertical: 'visible',
-                horizontal: 'visible',
-                verticalScrollbarSize: 8,
-                horizontalScrollbarSize: 8,
-              },
-              lineNumbersMinChars: 3,
-              automaticLayout: true,
-              cursorBlinking: 'smooth',
-              cursorSmoothCaretAnimation: 'on',
-              padding: { top: 16 },
-              tabSize: 2,
-            }}
-          />
-        </div>
+        activeTab.filePath === 'nexel://snippets' ? (
+          <SnippetsViewer snippetsData={snippets} />
+        ) : (
+          <div className="nx-editor-workspace-area">
+            <MonacoEditor
+              height="100%"
+              language={getLanguage(activeTab.name)}
+              value={activeTab.content}
+              onChange={handleEditorChange}
+              onMount={handleEditorDidMount}
+              options={{
+                fontSize: 13,
+                fontFamily: 'Consolas, "Courier New", Courier, monospace',
+                minimap: { enabled: false },
+                scrollbar: {
+                  vertical: 'visible',
+                  horizontal: 'visible',
+                  verticalScrollbarSize: 8,
+                  horizontalScrollbarSize: 8,
+                },
+                lineNumbersMinChars: 3,
+                automaticLayout: true,
+                cursorBlinking: 'smooth',
+                cursorSmoothCaretAnimation: 'on',
+                padding: { top: 16 },
+                tabSize: 2,
+              }}
+            />
+          </div>
+        )
       ) : (
         <div className="nx-editor-welcome-backdrop">
           <div className="nx-welcome-glass-plate">
@@ -498,3 +558,68 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 };
 
 export default Editor;
+
+interface SnippetsViewerProps {
+  snippetsData: any;
+}
+
+const SnippetsViewer: React.FC<SnippetsViewerProps> = ({ snippetsData }) => {
+  const [search, setSearch] = useState('');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const filteredSnippets = Object.entries(snippetsData).filter(([key, value]: [string, any]) => {
+    const q = search.toLowerCase();
+    return (
+      key.toLowerCase().includes(q) ||
+      (value.prefix && value.prefix.toLowerCase().includes(q)) ||
+      (value.description && value.description.toLowerCase().includes(q))
+    );
+  });
+
+  const handleCopy = (key: string, body: string[]) => {
+    navigator.clipboard.writeText(body.join('\n'));
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
+
+  return (
+    <div className="nx-snippets-viewer">
+      <div className="nx-snippets-header">
+        <div>
+          <h1 className="nx-snippets-title">NEXEL SNIPPETS</h1>
+          <p className="nx-snippets-subtitle">Fast keyboard-expandable boilerplate fragments for Competitive Programming</p>
+        </div>
+        <input 
+          type="text" 
+          placeholder="Search snippets..." 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)} 
+          className="nx-snippets-search"
+        />
+      </div>
+
+      <div className="nx-snippets-grid">
+        {filteredSnippets.map(([key, value]: [string, any]) => (
+          <div key={key} className="nx-snippet-card">
+            <div className="nx-snippet-card-header">
+              <span className="nx-snippet-prefix-badge" title="Type prefix and press Tab to expand">{value.prefix}</span>
+              <span className="nx-snippet-desc">{value.description}</span>
+              <button 
+                className={`nx-snippet-copy-btn ${copiedKey === key ? 'copied' : ''}`}
+                onClick={() => handleCopy(key, value.body)}
+              >
+                {copiedKey === key ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre className="nx-snippet-code-block">
+              <code>{value.body.join('\n')}</code>
+            </pre>
+          </div>
+        ))}
+        {filteredSnippets.length === 0 && (
+          <div className="nx-snippets-empty">No matching snippets found.</div>
+        )}
+      </div>
+    </div>
+  );
+};
