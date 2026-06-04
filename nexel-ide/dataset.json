@@ -1,0 +1,1631 @@
+{
+  "keywords": [
+    {
+      "label": "if",
+      "detail": "C++ keyword",
+      "documentation": "Conditional statement.",
+      "score": 100
+    },
+    {
+      "label": "else",
+      "detail": "C++ keyword",
+      "documentation": "Alternative branch of an if statement.",
+      "score": 100
+    },
+    {
+      "label": "switch",
+      "detail": "C++ keyword",
+      "documentation": "Multi-way branch based on integral value.",
+      "score": 80
+    },
+    {
+      "label": "case",
+      "detail": "C++ keyword",
+      "documentation": "A single branch inside a switch.",
+      "score": 80
+    },
+    {
+      "label": "default",
+      "detail": "C++ keyword",
+      "documentation": "Fallback branch in a switch.",
+      "score": 70
+    },
+    {
+      "label": "for",
+      "detail": "C++ keyword",
+      "documentation": "Iteration loop.",
+      "score": 100
+    },
+    {
+      "label": "while",
+      "detail": "C++ keyword",
+      "documentation": "Pre-condition loop.",
+      "score": 95
+    },
+    {
+      "label": "do",
+      "detail": "C++ keyword",
+      "documentation": "Post-condition loop.",
+      "score": 50
+    },
+    {
+      "label": "break",
+      "detail": "C++ keyword",
+      "documentation": "Exit the innermost loop or switch.",
+      "score": 95
+    },
+    {
+      "label": "continue",
+      "detail": "C++ keyword",
+      "documentation": "Skip the rest of the current iteration.",
+      "score": 85
+    },
+    {
+      "label": "return",
+      "detail": "C++ keyword",
+      "documentation": "Return from a function.",
+      "score": 100
+    },
+    {
+      "label": "goto",
+      "detail": "C++ keyword",
+      "documentation": "Unconditional jump to a label.",
+      "score": 5
+    },
+    {
+      "label": "int",
+      "detail": "C++ keyword",
+      "documentation": "Integer type.",
+      "score": 100
+    },
+    {
+      "label": "long",
+      "detail": "C++ keyword",
+      "documentation": "Long integer modifier.",
+      "score": 90
+    },
+    {
+      "label": "short",
+      "detail": "C++ keyword",
+      "documentation": "Short integer modifier.",
+      "score": 20
+    },
+    {
+      "label": "signed",
+      "detail": "C++ keyword",
+      "documentation": "Explicitly signed integer modifier.",
+      "score": 30
+    },
+    {
+      "label": "unsigned",
+      "detail": "C++ keyword",
+      "documentation": "Unsigned integer modifier.",
+      "score": 70
+    },
+    {
+      "label": "char",
+      "detail": "C++ keyword",
+      "documentation": "Character type.",
+      "score": 80
+    },
+    {
+      "label": "wchar_t",
+      "detail": "C++ keyword",
+      "documentation": "Wide character type.",
+      "score": 10
+    },
+    {
+      "label": "char16_t",
+      "detail": "C++ keyword",
+      "documentation": "16-bit character type (C++11).",
+      "score": 10
+    },
+    {
+      "label": "char32_t",
+      "detail": "C++ keyword",
+      "documentation": "32-bit character type (C++11).",
+      "score": 10
+    },
+    {
+      "label": "bool",
+      "detail": "C++ keyword",
+      "documentation": "Boolean type.",
+      "score": 90
+    },
+    {
+      "label": "float",
+      "detail": "C++ keyword",
+      "documentation": "Single precision floating-point type.",
+      "score": 40
+    },
+    {
+      "label": "double",
+      "detail": "C++ keyword",
+      "documentation": "Double precision floating-point type.",
+      "score": 80
+    },
+    {
+      "label": "void",
+      "detail": "C++ keyword",
+      "documentation": "Empty type or absence of return value.",
+      "score": 90
+    },
+    {
+      "label": "auto",
+      "detail": "C++ keyword",
+      "documentation": "Type deduction from initializer.",
+      "score": 95
+    },
+    {
+      "label": "decltype",
+      "detail": "C++ keyword",
+      "documentation": "Yields the declared type of an expression.",
+      "score": 40
+    },
+    {
+      "label": "const",
+      "detail": "C++ keyword",
+      "documentation": "Constant qualification.",
+      "score": 95
+    },
+    {
+      "label": "constexpr",
+      "detail": "C++ keyword",
+      "documentation": "Compile-time constant expression.",
+      "score": 60
+    },
+    {
+      "label": "volatile",
+      "detail": "C++ keyword",
+      "documentation": "Indicates that a variable may be modified externally.",
+      "score": 10
+    },
+    {
+      "label": "static",
+      "detail": "C++ keyword",
+      "documentation": "Internal linkage or persistent local variable.",
+      "score": 70
+    },
+    {
+      "label": "extern",
+      "detail": "C++ keyword",
+      "documentation": "External linkage declaration.",
+      "score": 40
+    },
+    {
+      "label": "register",
+      "detail": "C++ keyword",
+      "documentation": "Hint to store variable in a register (deprecated).",
+      "score": 1
+    },
+    {
+      "label": "thread_local",
+      "detail": "C++ keyword",
+      "documentation": "Thread-local storage duration.",
+      "score": 15
+    },
+    {
+      "label": "mutable",
+      "detail": "C++ keyword",
+      "documentation": "Allows modification of a class member in a const object.",
+      "score": 20
+    },
+    {
+      "label": "typedef",
+      "detail": "C++ keyword",
+      "documentation": "Creates a type alias.",
+      "score": 60
+    },
+    {
+      "label": "using",
+      "detail": "C++ keyword",
+      "documentation": "Type alias or namespace usage.",
+      "score": 85
+    },
+    {
+      "label": "namespace",
+      "detail": "C++ keyword",
+      "documentation": "Defines a scope for identifiers.",
+      "score": 70
+    },
+    {
+      "label": "class",
+      "detail": "C++ keyword",
+      "documentation": "Defines a class type.",
+      "score": 80
+    },
+    {
+      "label": "struct",
+      "detail": "C++ keyword",
+      "documentation": "Defines a structure (class with public default access).",
+      "score": 85
+    },
+    {
+      "label": "union",
+      "detail": "C++ keyword",
+      "documentation": "A type whose members share the same memory.",
+      "score": 15
+    },
+    {
+      "label": "enum",
+      "detail": "C++ keyword",
+      "documentation": "Defines an enumeration type.",
+      "score": 50
+    },
+    {
+      "label": "public",
+      "detail": "C++ keyword",
+      "documentation": "Public access specifier.",
+      "score": 80
+    },
+    {
+      "label": "private",
+      "detail": "C++ keyword",
+      "documentation": "Private access specifier.",
+      "score": 80
+    },
+    {
+      "label": "protected",
+      "detail": "C++ keyword",
+      "documentation": "Protected access specifier.",
+      "score": 50
+    },
+    {
+      "label": "friend",
+      "detail": "C++ keyword",
+      "documentation": "Grants access to private/protected members.",
+      "score": 30
+    },
+    {
+      "label": "virtual",
+      "detail": "C++ keyword",
+      "documentation": "Declares a virtual function or base class.",
+      "score": 60
+    },
+    {
+      "label": "override",
+      "detail": "C++ keyword",
+      "documentation": "Explicitly marks a function as overriding a virtual function.",
+      "score": 70
+    },
+    {
+      "label": "final",
+      "detail": "C++ keyword",
+      "documentation": "Prevents further overriding or inheritance.",
+      "score": 40
+    },
+    {
+      "label": "explicit",
+      "detail": "C++ keyword",
+      "documentation": "Prevents implicit conversions.",
+      "score": 50
+    },
+    {
+      "label": "operator",
+      "detail": "C++ keyword",
+      "documentation": "Defines an operator overload.",
+      "score": 40
+    },
+    {
+      "label": "this",
+      "detail": "C++ keyword",
+      "documentation": "Pointer to the current object.",
+      "score": 80
+    },
+    {
+      "label": "new",
+      "detail": "C++ keyword",
+      "documentation": "Dynamic memory allocation.",
+      "score": 70
+    },
+    {
+      "label": "delete",
+      "detail": "C++ keyword",
+      "documentation": "Deallocates memory allocated by new.",
+      "score": 70
+    },
+    {
+      "label": "sizeof",
+      "detail": "C++ keyword",
+      "documentation": "Returns the size of a type or expression.",
+      "score": 60
+    },
+    {
+      "label": "alignof",
+      "detail": "C++ keyword",
+      "documentation": "Returns alignment requirement of a type.",
+      "score": 5
+    },
+    {
+      "label": "alignas",
+      "detail": "C++ keyword",
+      "documentation": "Sets the alignment requirement.",
+      "score": 5
+    },
+    {
+      "label": "typeid",
+      "detail": "C++ keyword",
+      "documentation": "Obtains type information at runtime.",
+      "score": 20
+    },
+    {
+      "label": "typename",
+      "detail": "C++ keyword",
+      "documentation": "Declares a type parameter or qualified dependent type.",
+      "score": 40
+    },
+    {
+      "label": "template",
+      "detail": "C++ keyword",
+      "documentation": "Defines a template.",
+      "score": 70
+    },
+    {
+      "label": "catch",
+      "detail": "C++ keyword",
+      "documentation": "Handles an exception.",
+      "score": 60
+    },
+    {
+      "label": "throw",
+      "detail": "C++ keyword",
+      "documentation": "Throws an exception.",
+      "score": 50
+    },
+    {
+      "label": "try",
+      "detail": "C++ keyword",
+      "documentation": "Begins a block where exceptions are caught.",
+      "score": 60
+    },
+    {
+      "label": "noexcept",
+      "detail": "C++ keyword",
+      "documentation": "Specifies that a function does not throw exceptions.",
+      "score": 30
+    },
+    {
+      "label": "true",
+      "detail": "C++ keyword",
+      "documentation": "Boolean true literal.",
+      "score": 90
+    },
+    {
+      "label": "false",
+      "detail": "C++ keyword",
+      "documentation": "Boolean false literal.",
+      "score": 90
+    },
+    {
+      "label": "nullptr",
+      "detail": "C++ keyword",
+      "documentation": "Null pointer literal.",
+      "score": 80
+    },
+    {
+      "label": "static_cast",
+      "detail": "C++ keyword",
+      "documentation": "Compile-time type conversion.",
+      "score": 50
+    },
+    {
+      "label": "const_cast",
+      "detail": "C++ keyword",
+      "documentation": "Adds or removes const/volatile qualifiers.",
+      "score": 15
+    },
+    {
+      "label": "dynamic_cast",
+      "detail": "C++ keyword",
+      "documentation": "Safe runtime polymorphic cast.",
+      "score": 20
+    },
+    {
+      "label": "reinterpret_cast",
+      "detail": "C++ keyword",
+      "documentation": "Low-level reinterpretation of bit patterns.",
+      "score": 5
+    },
+    {
+      "label": "and",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for &&.",
+      "score": 5
+    },
+    {
+      "label": "or",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for ||.",
+      "score": 5
+    },
+    {
+      "label": "not",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for !.",
+      "score": 5
+    },
+    {
+      "label": "xor",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for ^.",
+      "score": 1
+    },
+    {
+      "label": "and_eq",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for &=.",
+      "score": 1
+    },
+    {
+      "label": "or_eq",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for |=.",
+      "score": 1
+    },
+    {
+      "label": "xor_eq",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for ^=.",
+      "score": 1
+    },
+    {
+      "label": "not_eq",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for !=.",
+      "score": 5
+    },
+    {
+      "label": "bitand",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for &.",
+      "score": 1
+    },
+    {
+      "label": "bitor",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for |.",
+      "score": 1
+    },
+    {
+      "label": "compl",
+      "detail": "C++ keyword (alternative)",
+      "documentation": "Alternative token for ~.",
+      "score": 1
+    },
+    {
+      "label": "asm",
+      "detail": "C++ keyword",
+      "documentation": "Inline assembly code.",
+      "score": 1
+    },
+    {
+      "label": "export",
+      "detail": "C++ keyword",
+      "documentation": "Used for module exports (C++20) or template instantiation (removed).",
+      "score": 5
+    }
+  ],
+  "containers": [
+    {
+      "label": "std::vector",
+      "detail": "Container",
+      "documentation": "Dynamic array, manages contiguous memory. Fast random access, amortized O(1) push_back.",
+      "score": 100
+    },
+    {
+      "label": "std::string",
+      "detail": "Container",
+      "documentation": "Sequence of characters, dynamic array of char.",
+      "score": 95
+    },
+    {
+      "label": "std::array",
+      "detail": "Container",
+      "documentation": "Fixed-size array, size known at compile time. Wraps a C-style array.",
+      "score": 60
+    },
+    {
+      "label": "std::deque",
+      "detail": "Container",
+      "documentation": "Double-ended queue. Fast insertion/removal at both ends.",
+      "score": 40
+    },
+    {
+      "label": "std::list",
+      "detail": "Container",
+      "documentation": "Doubly-linked list. O(1) insert/erase anywhere.",
+      "score": 25
+    },
+    {
+      "label": "std::forward_list",
+      "detail": "Container",
+      "documentation": "Singly-linked list. Forward iteration only.",
+      "score": 10
+    },
+    {
+      "label": "std::stack",
+      "detail": "Container adapter",
+      "documentation": "LIFO stack, typically backed by deque or vector.",
+      "score": 70
+    },
+    {
+      "label": "std::queue",
+      "detail": "Container adapter",
+      "documentation": "FIFO queue, typically backed by deque.",
+      "score": 70
+    },
+    {
+      "label": "std::priority_queue",
+      "detail": "Container adapter",
+      "documentation": "Priority queue (max-heap by default). Backed by vector.",
+      "score": 80
+    },
+    {
+      "label": "std::set",
+      "detail": "Container",
+      "documentation": "Ordered set of unique keys, usually red-black tree. O(log n) operations.",
+      "score": 75
+    },
+    {
+      "label": "std::multiset",
+      "detail": "Container",
+      "documentation": "Ordered set allowing duplicate keys.",
+      "score": 35
+    },
+    {
+      "label": "std::map",
+      "detail": "Container",
+      "documentation": "Ordered map of key-value pairs, unique keys. O(log n) operations.",
+      "score": 80
+    },
+    {
+      "label": "std::multimap",
+      "detail": "Container",
+      "documentation": "Ordered map allowing duplicate keys.",
+      "score": 20
+    },
+    {
+      "label": "std::unordered_set",
+      "detail": "Container",
+      "documentation": "Hash set of unique keys. Average O(1) operations.",
+      "score": 65
+    },
+    {
+      "label": "std::unordered_multiset",
+      "detail": "Container",
+      "documentation": "Hash set allowing duplicate keys.",
+      "score": 15
+    },
+    {
+      "label": "std::unordered_map",
+      "detail": "Container",
+      "documentation": "Hash map from key to value. Average O(1) access.",
+      "score": 75
+    },
+    {
+      "label": "std::unordered_multimap",
+      "detail": "Container",
+      "documentation": "Hash map allowing duplicate keys.",
+      "score": 10
+    },
+    {
+      "label": "std::bitset",
+      "detail": "Container",
+      "documentation": "Fixed-size sequence of bits. Efficient bitwise operations.",
+      "score": 25
+    },
+    {
+      "label": "std::pair",
+      "detail": "Utility",
+      "documentation": "Container for two heterogeneous values.",
+      "score": 95
+    },
+    {
+      "label": "std::tuple",
+      "detail": "Utility",
+      "documentation": "Fixed-size collection of heterogeneous values.",
+      "score": 50
+    },
+    {
+      "label": "std::optional",
+      "detail": "C++17 utility",
+      "documentation": "Wraps an optional value that may or may not be present.",
+      "score": 25
+    },
+    {
+      "label": "std::variant",
+      "detail": "C++17 utility",
+      "documentation": "Type-safe union of a fixed set of types.",
+      "score": 15
+    },
+    {
+      "label": "std::any",
+      "detail": "C++17 utility",
+      "documentation": "Container for single values of any copy-constructible type.",
+      "score": 10
+    },
+    {
+      "label": "std::string_view",
+      "detail": "C++17 utility",
+      "documentation": "Non-owning read-only view of a string.",
+      "score": 40
+    },
+    {
+      "label": "std::unique_ptr",
+      "detail": "Smart pointer",
+      "documentation": "Unique ownership smart pointer.",
+      "score": 60
+    },
+    {
+      "label": "std::shared_ptr",
+      "detail": "Smart pointer",
+      "documentation": "Shared ownership smart pointer.",
+      "score": 55
+    },
+    {
+      "label": "std::weak_ptr",
+      "detail": "Smart pointer",
+      "documentation": "Non-owning weak reference to a shared_ptr.",
+      "score": 20
+    },
+    {
+      "label": "std::begin",
+      "detail": "Iterator utility",
+      "documentation": "Returns an iterator to the beginning of a container or array.",
+      "score": 70
+    },
+    {
+      "label": "std::end",
+      "detail": "Iterator utility",
+      "documentation": "Returns an iterator to the end of a container or array.",
+      "score": 70
+    },
+    {
+      "label": "std::cbegin",
+      "detail": "Iterator utility",
+      "documentation": "Returns a const iterator to the beginning.",
+      "score": 20
+    },
+    {
+      "label": "std::cend",
+      "detail": "Iterator utility",
+      "documentation": "Returns a const iterator to the end.",
+      "score": 20
+    },
+    {
+      "label": "std::rbegin",
+      "detail": "Iterator utility",
+      "documentation": "Returns a reverse iterator to the beginning of reversed container.",
+      "score": 30
+    },
+    {
+      "label": "std::rend",
+      "detail": "Iterator utility",
+      "documentation": "Returns a reverse iterator to the end of reversed container.",
+      "score": 30
+    },
+    {
+      "label": "std::size",
+      "detail": "C++17 utility",
+      "documentation": "Returns the size of a container or array.",
+      "score": 70
+    },
+    {
+      "label": "std::empty",
+      "detail": "Utility",
+      "documentation": "Checks if a container or array is empty.",
+      "score": 70
+    },
+    {
+      "label": "std::data",
+      "detail": "Utility",
+      "documentation": "Returns a pointer to the underlying array of a container.",
+      "score": 40
+    }
+  ],
+  "algorithms": [
+    {
+      "label": "std::sort",
+      "detail": "Algorithm",
+      "documentation": "Sorts a range in ascending order (or with custom comparator). O(N log N).",
+      "score": 100
+    },
+    {
+      "label": "std::stable_sort",
+      "detail": "Algorithm",
+      "documentation": "Sorts preserving relative order of equal elements.",
+      "score": 30
+    },
+    {
+      "label": "std::partial_sort",
+      "detail": "Algorithm",
+      "documentation": "Sorts the first middle elements leaving the rest unspecified.",
+      "score": 20
+    },
+    {
+      "label": "std::nth_element",
+      "detail": "Algorithm",
+      "documentation": "Places the nth element in sorted position, partially orders the rest.",
+      "score": 15
+    },
+    {
+      "label": "std::binary_search",
+      "detail": "Algorithm",
+      "documentation": "Checks if a value exists in a sorted range. O(log N).",
+      "score": 80
+    },
+    {
+      "label": "std::lower_bound",
+      "detail": "Algorithm",
+      "documentation": "Finds first position where value could be inserted without breaking order.",
+      "score": 90
+    },
+    {
+      "label": "std::upper_bound",
+      "detail": "Algorithm",
+      "documentation": "Finds first position where a value greater than the given one could be inserted.",
+      "score": 75
+    },
+    {
+      "label": "std::equal_range",
+      "detail": "Algorithm",
+      "documentation": "Returns the subrange of elements equal to a value in a sorted range.",
+      "score": 30
+    },
+    {
+      "label": "std::merge",
+      "detail": "Algorithm",
+      "documentation": "Merges two sorted ranges into one sorted range.",
+      "score": 30
+    },
+    {
+      "label": "std::inplace_merge",
+      "detail": "Algorithm",
+      "documentation": "Merges two consecutive sorted subranges in place.",
+      "score": 10
+    },
+    {
+      "label": "std::includes",
+      "detail": "Algorithm",
+      "documentation": "Checks if one sorted range is a subset of another.",
+      "score": 20
+    },
+    {
+      "label": "std::set_union",
+      "detail": "Algorithm",
+      "documentation": "Computes the union of two sorted ranges.",
+      "score": 25
+    },
+    {
+      "label": "std::set_intersection",
+      "detail": "Algorithm",
+      "documentation": "Computes the intersection of two sorted ranges.",
+      "score": 30
+    },
+    {
+      "label": "std::set_difference",
+      "detail": "Algorithm",
+      "documentation": "Computes elements present in the first but not the second sorted range.",
+      "score": 25
+    },
+    {
+      "label": "std::set_symmetric_difference",
+      "detail": "Algorithm",
+      "documentation": "Computes elements in either of two sorted ranges but not both.",
+      "score": 15
+    },
+    {
+      "label": "std::is_sorted",
+      "detail": "Algorithm",
+      "documentation": "Checks if a range is sorted.",
+      "score": 20
+    },
+    {
+      "label": "std::is_sorted_until",
+      "detail": "Algorithm",
+      "documentation": "Finds the largest sorted prefix.",
+      "score": 5
+    },
+    {
+      "label": "std::next_permutation",
+      "detail": "Algorithm",
+      "documentation": "Generates the next lexicographical permutation of a range.",
+      "score": 70
+    },
+    {
+      "label": "std::prev_permutation",
+      "detail": "Algorithm",
+      "documentation": "Generates the previous lexicographical permutation.",
+      "score": 50
+    },
+    {
+      "label": "std::reverse",
+      "detail": "Algorithm",
+      "documentation": "Reverses the order of elements in a range.",
+      "score": 80
+    },
+    {
+      "label": "std::rotate",
+      "detail": "Algorithm",
+      "documentation": "Rotates elements around a middle point.",
+      "score": 30
+    },
+    {
+      "label": "std::shuffle",
+      "detail": "Algorithm",
+      "documentation": "Randomly reorders elements using a random generator.",
+      "score": 40
+    },
+    {
+      "label": "std::sample",
+      "detail": "C++17 algorithm",
+      "documentation": "Selects n random elements from a range.",
+      "score": 10
+    },
+    {
+      "label": "std::partition",
+      "detail": "Algorithm",
+      "documentation": "Reorders elements so that those satisfying a predicate come first.",
+      "score": 40
+    },
+    {
+      "label": "std::stable_partition",
+      "detail": "Algorithm",
+      "documentation": "Partitions preserving relative order.",
+      "score": 20
+    },
+    {
+      "label": "std::is_partitioned",
+      "detail": "Algorithm",
+      "documentation": "Checks if the range is partitioned by a predicate.",
+      "score": 10
+    },
+    {
+      "label": "std::unique",
+      "detail": "Algorithm",
+      "documentation": "Removes consecutive duplicate elements.",
+      "score": 70
+    },
+    {
+      "label": "std::unique_copy",
+      "detail": "Algorithm",
+      "documentation": "Copies elements skipping consecutive duplicates.",
+      "score": 20
+    },
+    {
+      "label": "std::remove",
+      "detail": "Algorithm",
+      "documentation": "Removes elements equal to a value, preserving order of remaining.",
+      "score": 70
+    },
+    {
+      "label": "std::remove_if",
+      "detail": "Algorithm",
+      "documentation": "Removes elements satisfying a predicate.",
+      "score": 60
+    },
+    {
+      "label": "std::replace",
+      "detail": "Algorithm",
+      "documentation": "Replaces occurrences of a value with another.",
+      "score": 50
+    },
+    {
+      "label": "std::replace_if",
+      "detail": "Algorithm",
+      "documentation": "Replaces elements satisfying a predicate.",
+      "score": 40
+    },
+    {
+      "label": "std::fill",
+      "detail": "Algorithm",
+      "documentation": "Assigns a value to all elements in a range.",
+      "score": 90
+    },
+    {
+      "label": "std::fill_n",
+      "detail": "Algorithm",
+      "documentation": "Assigns a value to the first n elements.",
+      "score": 60
+    },
+    {
+      "label": "std::generate",
+      "detail": "Algorithm",
+      "documentation": "Generates values using a function and stores them in a range.",
+      "score": 30
+    },
+    {
+      "label": "std::generate_n",
+      "detail": "Algorithm",
+      "documentation": "Generates n values using a function.",
+      "score": 20
+    },
+    {
+      "label": "std::copy",
+      "detail": "Algorithm",
+      "documentation": "Copies elements from one range to another.",
+      "score": 90
+    },
+    {
+      "label": "std::copy_if",
+      "detail": "Algorithm",
+      "documentation": "Copies elements that satisfy a predicate.",
+      "score": 50
+    },
+    {
+      "label": "std::copy_n",
+      "detail": "Algorithm",
+      "documentation": "Copies exactly n elements.",
+      "score": 60
+    },
+    {
+      "label": "std::move",
+      "detail": "Algorithm",
+      "documentation": "Moves elements from one range to another.",
+      "score": 50
+    },
+    {
+      "label": "std::swap",
+      "detail": "Algorithm / utility",
+      "documentation": "Swaps the values of two objects.",
+      "score": 90
+    },
+    {
+      "label": "std::swap_ranges",
+      "detail": "Algorithm",
+      "documentation": "Swaps two ranges element-wise.",
+      "score": 20
+    },
+    {
+      "label": "std::iter_swap",
+      "detail": "Algorithm",
+      "documentation": "Swaps the elements pointed to by two iterators.",
+      "score": 25
+    },
+    {
+      "label": "std::transform",
+      "detail": "Algorithm",
+      "documentation": "Applies a function to each element and stores the result.",
+      "score": 70
+    },
+    {
+      "label": "std::for_each",
+      "detail": "Algorithm",
+      "documentation": "Applies a function to each element in a range.",
+      "score": 60
+    },
+    {
+      "label": "std::for_each_n",
+      "detail": "C++17 algorithm",
+      "documentation": "Applies a function to the first n elements.",
+      "score": 15
+    },
+    {
+      "label": "std::all_of",
+      "detail": "Algorithm",
+      "documentation": "Checks if all elements satisfy a predicate.",
+      "score": 50
+    },
+    {
+      "label": "std::any_of",
+      "detail": "Algorithm",
+      "documentation": "Checks if any element satisfies a predicate.",
+      "score": 50
+    },
+    {
+      "label": "std::none_of",
+      "detail": "Algorithm",
+      "documentation": "Checks if no element satisfies a predicate.",
+      "score": 50
+    },
+    {
+      "label": "std::count",
+      "detail": "Algorithm",
+      "documentation": "Counts elements equal to a value.",
+      "score": 80
+    },
+    {
+      "label": "std::count_if",
+      "detail": "Algorithm",
+      "documentation": "Counts elements satisfying a predicate.",
+      "score": 60
+    },
+    {
+      "label": "std::find",
+      "detail": "Algorithm",
+      "documentation": "Finds the first element equal to a value.",
+      "score": 90
+    },
+    {
+      "label": "std::find_if",
+      "detail": "Algorithm",
+      "documentation": "Finds the first element satisfying a predicate.",
+      "score": 60
+    },
+    {
+      "label": "std::find_if_not",
+      "detail": "Algorithm",
+      "documentation": "Finds the first element not satisfying a predicate.",
+      "score": 30
+    },
+    {
+      "label": "std::find_end",
+      "detail": "Algorithm",
+      "documentation": "Finds the last occurrence of a subsequence.",
+      "score": 15
+    },
+    {
+      "label": "std::find_first_of",
+      "detail": "Algorithm",
+      "documentation": "Finds the first occurrence of any element from a given set.",
+      "score": 25
+    },
+    {
+      "label": "std::adjacent_find",
+      "detail": "Algorithm",
+      "documentation": "Finds the first adjacent pair satisfying a criterion.",
+      "score": 15
+    },
+    {
+      "label": "std::search",
+      "detail": "Algorithm",
+      "documentation": "Searches for a subsequence in a range.",
+      "score": 30
+    },
+    {
+      "label": "std::search_n",
+      "detail": "Algorithm",
+      "documentation": "Searches for n consecutive copies of a value.",
+      "score": 15
+    },
+    {
+      "label": "std::mismatch",
+      "detail": "Algorithm",
+      "documentation": "Finds the first position where two ranges differ.",
+      "score": 10
+    },
+    {
+      "label": "std::equal",
+      "detail": "Algorithm",
+      "documentation": "Checks if two ranges are equal.",
+      "score": 40
+    },
+    {
+      "label": "std::lexicographical_compare",
+      "detail": "Algorithm",
+      "documentation": "Compares two ranges lexicographically.",
+      "score": 20
+    },
+    {
+      "label": "std::min",
+      "detail": "Algorithm",
+      "documentation": "Returns the smaller of two values.",
+      "score": 90
+    },
+    {
+      "label": "std::max",
+      "detail": "Algorithm",
+      "documentation": "Returns the larger of two values.",
+      "score": 90
+    },
+    {
+      "label": "std::minmax",
+      "detail": "Algorithm",
+      "documentation": "Returns a pair of the min and max of two values.",
+      "score": 40
+    },
+    {
+      "label": "std::min_element",
+      "detail": "Algorithm",
+      "documentation": "Returns an iterator to the smallest element in a range.",
+      "score": 60
+    },
+    {
+      "label": "std::max_element",
+      "detail": "Algorithm",
+      "documentation": "Returns an iterator to the largest element in a range.",
+      "score": 60
+    },
+    {
+      "label": "std::minmax_element",
+      "detail": "Algorithm",
+      "documentation": "Returns iterators to the smallest and largest elements.",
+      "score": 30
+    },
+    {
+      "label": "std::clamp",
+      "detail": "C++17 algorithm",
+      "documentation": "Clamps a value between a low and a high boundary.",
+      "score": 20
+    },
+    {
+      "label": "std::accumulate",
+      "detail": "Numeric algorithm",
+      "documentation": "Sums elements or applies a binary operation left-fold.",
+      "score": 80
+    },
+    {
+      "label": "std::inner_product",
+      "detail": "Numeric algorithm",
+      "documentation": "Computes the inner product of two ranges.",
+      "score": 30
+    },
+    {
+      "label": "std::adjacent_difference",
+      "detail": "Numeric algorithm",
+      "documentation": "Computes differences between adjacent elements.",
+      "score": 20
+    },
+    {
+      "label": "std::partial_sum",
+      "detail": "Numeric algorithm",
+      "documentation": "Computes cumulative prefix sums.",
+      "score": 30
+    },
+    {
+      "label": "std::iota",
+      "detail": "Numeric algorithm",
+      "documentation": "Fills a range with consecutive increments of a starting value.",
+      "score": 60
+    }
+  ],
+  "math": [
+    {
+      "label": "std::sqrt",
+      "detail": "Math function",
+      "documentation": "Square root.",
+      "score": 80
+    },
+    {
+      "label": "std::cbrt",
+      "detail": "Math function",
+      "documentation": "Cube root.",
+      "score": 20
+    },
+    {
+      "label": "std::pow",
+      "detail": "Math function",
+      "documentation": "Power function, base raised to exponent.",
+      "score": 80
+    },
+    {
+      "label": "std::exp",
+      "detail": "Math function",
+      "documentation": "e raised to the given power.",
+      "score": 30
+    },
+    {
+      "label": "std::log",
+      "detail": "Math function",
+      "documentation": "Natural logarithm.",
+      "score": 60
+    },
+    {
+      "label": "std::log2",
+      "detail": "Math function",
+      "documentation": "Base-2 logarithm.",
+      "score": 60
+    },
+    {
+      "label": "std::log10",
+      "detail": "Math function",
+      "documentation": "Base-10 logarithm.",
+      "score": 50
+    },
+    {
+      "label": "std::abs",
+      "detail": "Math function",
+      "documentation": "Absolute value (overloads for int, long, etc.).",
+      "score": 90
+    },
+    {
+      "label": "std::fabs",
+      "detail": "Math function",
+      "documentation": "Absolute value of a floating-point number.",
+      "score": 70
+    },
+    {
+      "label": "std::floor",
+      "detail": "Math function",
+      "documentation": "Rounds down to the nearest integer.",
+      "score": 60
+    },
+    {
+      "label": "std::ceil",
+      "detail": "Math function",
+      "documentation": "Rounds up to the nearest integer.",
+      "score": 60
+    },
+    {
+      "label": "std::round",
+      "detail": "Math function",
+      "documentation": "Rounds to the nearest integer, halfway cases away from zero.",
+      "score": 50
+    },
+    {
+      "label": "std::trunc",
+      "detail": "Math function",
+      "documentation": "Truncates toward zero.",
+      "score": 30
+    },
+    {
+      "label": "std::sin",
+      "detail": "Math function",
+      "documentation": "Sine.",
+      "score": 40
+    },
+    {
+      "label": "std::cos",
+      "detail": "Math function",
+      "documentation": "Cosine.",
+      "score": 40
+    },
+    {
+      "label": "std::tan",
+      "detail": "Math function",
+      "documentation": "Tangent.",
+      "score": 30
+    },
+    {
+      "label": "std::atan2",
+      "detail": "Math function",
+      "documentation": "Arctangent of y/x with quadrant awareness.",
+      "score": 30
+    },
+    {
+      "label": "std::hypot",
+      "detail": "Math function",
+      "documentation": "Euclidean distance sqrt(x^2 + y^2).",
+      "score": 20
+    },
+    {
+      "label": "std::fmod",
+      "detail": "Math function",
+      "documentation": "Floating-point remainder.",
+      "score": 20
+    },
+    {
+      "label": "std::gcd",
+      "detail": "C++17 numeric",
+      "documentation": "Greatest common divisor.",
+      "score": 90
+    },
+    {
+      "label": "std::lcm",
+      "detail": "C++17 numeric",
+      "documentation": "Least common multiple.",
+      "score": 50
+    }
+  ],
+  "io": [
+    {
+      "label": "std::cin",
+      "detail": "I/O stream",
+      "documentation": "Standard input stream (istream).",
+      "score": 100
+    },
+    {
+      "label": "std::cout",
+      "detail": "I/O stream",
+      "documentation": "Standard output stream (ostream).",
+      "score": 100
+    },
+    {
+      "label": "std::cerr",
+      "detail": "I/O stream",
+      "documentation": "Standard error stream (unbuffered).",
+      "score": 50
+    },
+    {
+      "label": "std::clog",
+      "detail": "I/O stream",
+      "documentation": "Standard log stream (buffered).",
+      "score": 20
+    },
+    {
+      "label": "std::endl",
+      "detail": "I/O manipulator",
+      "documentation": "Inserts a newline and flushes the stream.",
+      "score": 95
+    },
+    {
+      "label": "std::flush",
+      "detail": "I/O manipulator",
+      "documentation": "Flushes the output stream.",
+      "score": 30
+    },
+    {
+      "label": "std::getline",
+      "detail": "String I/O",
+      "documentation": "Reads a line from an input stream into a string.",
+      "score": 80
+    },
+    {
+      "label": "std::stoi",
+      "detail": "String conversion",
+      "documentation": "Converts a string to int.",
+      "score": 70
+    },
+    {
+      "label": "std::stoll",
+      "detail": "String conversion",
+      "documentation": "Converts a string to long long.",
+      "score": 60
+    },
+    {
+      "label": "std::stod",
+      "detail": "String conversion",
+      "documentation": "Converts a string to double.",
+      "score": 50
+    },
+    {
+      "label": "std::to_string",
+      "detail": "String conversion",
+      "documentation": "Converts a numeric value to std::string.",
+      "score": 70
+    },
+    {
+      "label": "std::stringstream",
+      "detail": "String stream",
+      "documentation": "Stream for reading from/writing to strings.",
+      "score": 40
+    },
+    {
+      "label": "std::istringstream",
+      "detail": "String input stream",
+      "documentation": "Input string stream.",
+      "score": 40
+    },
+    {
+      "label": "std::ostringstream",
+      "detail": "String output stream",
+      "documentation": "Output string stream.",
+      "score": 40
+    },
+    {
+      "label": "std::fstream",
+      "detail": "File stream",
+      "documentation": "File stream for reading and writing.",
+      "score": 30
+    },
+    {
+      "label": "std::ifstream",
+      "detail": "File input stream",
+      "documentation": "Input file stream.",
+      "score": 50
+    },
+    {
+      "label": "std::ofstream",
+      "detail": "File output stream",
+      "documentation": "Output file stream.",
+      "score": 50
+    },
+    {
+      "label": "std::setprecision",
+      "detail": "I/O manipulator",
+      "documentation": "Set decimal precision for floating-point output.",
+      "score": 50
+    },
+    {
+      "label": "std::fixed",
+      "detail": "I/O manipulator",
+      "documentation": "Use fixed-point notation for floating-point output.",
+      "score": 60
+    },
+    {
+      "label": "std::scientific",
+      "detail": "I/O manipulator",
+      "documentation": "Use scientific notation.",
+      "score": 30
+    },
+    {
+      "label": "std::setw",
+      "detail": "I/O manipulator",
+      "documentation": "Set field width for output.",
+      "score": 40
+    }
+  ],
+  "cp": [
+    {
+      "label": "vec",
+      "insertText": "vector",
+      "detail": "Alias",
+      "documentation": "Short for std::vector.",
+      "score": 90
+    },
+    {
+      "label": "pq",
+      "insertText": "priority_queue",
+      "detail": "Alias",
+      "documentation": "Short for std::priority_queue.",
+      "score": 80
+    },
+    {
+      "label": "umap",
+      "insertText": "unordered_map",
+      "detail": "Alias",
+      "documentation": "Short for std::unordered_map.",
+      "score": 70
+    },
+    {
+      "label": "uset",
+      "insertText": "unordered_set",
+      "detail": "Alias",
+      "documentation": "Short for std::unordered_set.",
+      "score": 70
+    },
+    {
+      "label": "ll",
+      "insertText": "long long",
+      "detail": "Alias",
+      "documentation": "Short for long long type.",
+      "score": 100
+    },
+    {
+      "label": "pii",
+      "insertText": "pair<int,int>",
+      "detail": "Alias",
+      "documentation": "Pair of ints.",
+      "score": 85
+    },
+    {
+      "label": "vll",
+      "insertText": "vector<long long>",
+      "detail": "Alias",
+      "documentation": "Vector of long longs.",
+      "score": 85
+    },
+    {
+      "label": "FenwickTree",
+      "detail": "Data structure",
+      "documentation": "Fenwick tree (Binary Indexed Tree) for prefix sums and point updates.",
+      "score": 70
+    },
+    {
+      "label": "BIT",
+      "insertText": "FenwickTree",
+      "detail": "Alias",
+      "documentation": "Short for FenwickTree.",
+      "score": 70
+    },
+    {
+      "label": "SegmentTree",
+      "detail": "Data structure",
+      "documentation": "Segment tree for range queries and updates.",
+      "score": 80
+    },
+    {
+      "label": "LazySegmentTree",
+      "detail": "Data structure",
+      "documentation": "Segment tree with lazy propagation.",
+      "score": 60
+    },
+    {
+      "label": "UnionFind",
+      "detail": "Data structure",
+      "documentation": "Disjoint-set/union-find structure.",
+      "score": 70
+    },
+    {
+      "label": "DSU",
+      "insertText": "UnionFind",
+      "detail": "Alias",
+      "documentation": "Short for UnionFind.",
+      "score": 70
+    },
+    {
+      "label": "SparseTable",
+      "detail": "Data structure",
+      "documentation": "Supports O(1) range minimum queries for idempotent operations.",
+      "score": 50
+    },
+    {
+      "label": "BFS",
+      "detail": "Graph algorithm",
+      "documentation": "Breadth-first search for shortest paths in unweighted graphs.",
+      "score": 60
+    },
+    {
+      "label": "DFS",
+      "detail": "Graph algorithm",
+      "documentation": "Depth-first search for traversal and connectivity.",
+      "score": 60
+    },
+    {
+      "label": "Dijkstra",
+      "detail": "Graph algorithm",
+      "documentation": "Single-source shortest paths with non-negative weights.",
+      "score": 70
+    },
+    {
+      "label": "BellmanFord",
+      "detail": "Graph algorithm",
+      "documentation": "Single-source shortest paths, works with negative edges.",
+      "score": 40
+    },
+    {
+      "label": "FloydWarshall",
+      "detail": "Graph algorithm",
+      "documentation": "All-pairs shortest paths.",
+      "score": 30
+    },
+    {
+      "label": "Kruskal",
+      "detail": "MST algorithm",
+      "documentation": "Kruskal's algorithm using DSU.",
+      "score": 60
+    },
+    {
+      "label": "Prim",
+      "detail": "MST algorithm",
+      "documentation": "Prim's algorithm using priority queue.",
+      "score": 60
+    },
+    {
+      "label": "TopologicalSort",
+      "detail": "Graph algorithm",
+      "documentation": "Linear ordering of vertices in a DAG.",
+      "score": 50
+    },
+    {
+      "label": "SCC",
+      "detail": "Graph concept",
+      "documentation": "Strongly Connected Component.",
+      "score": 40
+    },
+    {
+      "label": "Tarjan",
+      "detail": "Algorithm",
+      "documentation": "Tarjan's SCC algorithm or bridge/articulation point finding.",
+      "score": 40
+    },
+    {
+      "label": "KMP",
+      "detail": "String algorithm",
+      "documentation": "Knuth-Morris-Pratt string matching.",
+      "score": 60
+    },
+    {
+      "label": "Z_algorithm",
+      "detail": "String algorithm",
+      "documentation": "Computes Z-array for pattern matching.",
+      "score": 40
+    },
+    {
+      "label": "std::make_unique",
+      "detail": "Utility",
+      "documentation": "Creates a std::unique_ptr.",
+      "score": 55
+    },
+    {
+      "label": "std::make_shared",
+      "detail": "Utility",
+      "documentation": "Creates a std::shared_ptr.",
+      "score": 55
+    },
+    {
+      "label": "std::forward",
+      "detail": "Utility",
+      "documentation": "Perfect forwarding of arguments.",
+      "score": 70
+    },
+    {
+      "label": "std::move",
+      "detail": "Utility",
+      "documentation": "Casts to an rvalue reference, enabling move semantics.",
+      "score": 80
+    },
+    {
+      "label": "std::exchange",
+      "detail": "Utility",
+      "documentation": "Replaces the value of an object and returns its old value.",
+      "score": 30
+    },
+    {
+      "label": "std::tie",
+      "detail": "Utility",
+      "documentation": "Creates a tuple of lvalue references for unpacking.",
+      "score": 50
+    }
+  ]
+}

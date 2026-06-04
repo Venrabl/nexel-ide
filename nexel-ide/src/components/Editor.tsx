@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import './Editor.css';
 import logoImg from '../assets/logo.png';
+import dataset from '../../dataset.json';
 
 interface EditorTab {
   filePath: string;
@@ -25,6 +26,16 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   
   const autoSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const editorRef = useRef<any>(null);
+  const completionProviderRef = useRef<any>(null);
+
+  // Clean up completion provider on unmount
+  useEffect(() => {
+    return () => {
+      if (completionProviderRef.current) {
+        completionProviderRef.current.dispose();
+      }
+    };
+  }, []);
 
   const closeAllTabs = () => {
     setShowMenu(false);
@@ -260,6 +271,75 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     });
 
     monaco.editor.setTheme('nexel-minimal-dark');
+
+    // Register C++ autocomplete provider based on dataset.json
+    if (completionProviderRef.current) {
+      completionProviderRef.current.dispose();
+    }
+    completionProviderRef.current = monaco.languages.registerCompletionItemProvider('cpp', {
+      provideCompletionItems: (model: any, position: any) => {
+        const text = model.getValue();
+        const hasUsingStd = /\busing\s+namespace\s+std\s*;/.test(text);
+
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+
+        const suggestions: any[] = [];
+        const categories = ['keywords', 'containers', 'algorithms', 'math', 'io', 'cp'];
+
+        categories.forEach(category => {
+          const items = (dataset as any)[category] || [];
+          items.forEach((item: any) => {
+            let label = item.label;
+            let insertText = item.insertText || item.label;
+
+            // Strip std:: if using namespace std
+            if (hasUsingStd) {
+              if (label.startsWith('std::')) {
+                label = label.substring(5);
+              }
+              if (insertText.startsWith('std::')) {
+                insertText = insertText.substring(5);
+              }
+            }
+
+            let kind = monaco.languages.CompletionItemKind.Keyword;
+            if (category === 'containers') {
+              kind = monaco.languages.CompletionItemKind.Class;
+            } else if (category === 'algorithms' || category === 'math') {
+              kind = monaco.languages.CompletionItemKind.Function;
+            } else if (category === 'io') {
+              kind = monaco.languages.CompletionItemKind.Interface;
+            } else if (category === 'cp') {
+              kind = monaco.languages.CompletionItemKind.Snippet;
+            }
+
+            // Order by score: 1000 - score ensures higher scores appear first
+            const score = item.score !== undefined ? item.score : 50;
+            const sortText = String(1000 - score).padStart(4, '0');
+
+            suggestions.push({
+              label: label,
+              kind: kind,
+              detail: item.detail || `${category} (Nexel Autocomplete)`,
+              documentation: {
+                value: item.documentation || '',
+              },
+              insertText: insertText,
+              range: range,
+              sortText: sortText,
+            });
+          });
+        });
+
+        return { suggestions };
+      }
+    });
   };
 
   const activeTab = tabs.find(t => t.filePath === activeTabPath);

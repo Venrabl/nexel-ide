@@ -187,27 +187,37 @@
   width: 100%;
 }
 
-.nd-footer-btn {
-  background: transparent;
-  border: none;
-  padding: 4px;
-  margin: 0;
-  cursor: pointer;
+.nd-footer-shuriken {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.25);
+  padding: 4px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  user-select: none;
 }
 
-.nd-footer-btn:hover {
+.nd-shuriken-icon {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.25);
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/* Spinner animation for shuriken */
+@keyframes shuriken-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Spin and glow the shuriken icon when the navdock (nd-dock) is hovered */
+.nd-dock:hover .nd-shuriken-icon {
   color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: rotate(30deg);
-}
-
-.nd-footer-btn svg {
-  width: 15px;
-  height: 15px;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+  animation: shuriken-spin 1.5s linear infinite;
 }

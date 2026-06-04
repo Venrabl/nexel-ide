@@ -69,6 +69,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
       setRootPath(selectedDir);
       const parsedName = selectedDir.split(/[\\/]/).pop() || selectedDir;
       setRootName(parsedName.toUpperCase());
+      setLastSelectedNode(null);
       await refreshTree(selectedDir);
     } catch (error) {
       console.error("Workspace mount failure:", error);
@@ -483,7 +484,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
   // Tree recursive rendering
   const renderTree = (nodes: FileNode[], depth = 0) => {
     return nodes.map((node, index) => {
-      const isSelected = activeFilePath === node.path;
+      const isSelected = activeFilePath === node.path || (lastSelectedNode && lastSelectedNode.path === node.path);
       const isFolder = node.type === 'folder';
 
       // Inline editing element placement
@@ -495,6 +496,15 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
           {isInlineEditingThisNode ? (
             <form onSubmit={handleInlineSubmit} className="nx-inline-input-form" style={{ paddingLeft: `${depth * 14 + 18}px` }}>
               <div className="nx-inline-input-wrapper">
+                <span className="nx-inline-icon-indicator">
+                  {node.type === 'folder' ? (
+                    <svg className="nx-svg-icon folder open" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  ) : (
+                    getFileIcon(node.name)
+                  )}
+                </span>
                 <input
                   ref={inputRef}
                   type="text"
@@ -517,7 +527,8 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, node)}
               onContextMenu={(e) => handleContextMenu(e, node)}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setLastSelectedNode(node);
                 if (isFolder) {
                   toggleFolder(node.path);
@@ -525,7 +536,8 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                   if (onFileSelect) onFileSelect(node.path, false);
                 }
               }}
-              onDoubleClick={() => {
+              onDoubleClick={(e) => {
+                e.stopPropagation();
                 setLastSelectedNode(node);
                 if (!isFolder && onFileSelect) {
                   onFileSelect(node.path, true);
@@ -571,6 +583,18 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
             <div style={{ paddingLeft: `${(depth + 1) * 14 + 18}px` }}>
               <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
                 <div className="nx-inline-input-wrapper">
+                  <span className="nx-inline-icon-indicator">
+                    {inlineInput.mode === 'new-folder' ? (
+                      <svg className="nx-svg-icon folder open" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                      </svg>
+                    ) : (
+                      <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                      </svg>
+                    )}
+                  </span>
                   <input
                     ref={inputRef}
                     type="text"
@@ -699,6 +723,11 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
       <div 
         className="nx-tree-scroll"
         onContextMenu={handleEmptyAreaContextMenu}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setLastSelectedNode(null);
+          }
+        }}
       >
         {tree.length === 0 ? (
           <div className="nx-empty-state">
@@ -711,6 +740,18 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
               <div style={{ paddingLeft: '18px', margin: '2px 8px' }}>
                 <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
                   <div className="nx-inline-input-wrapper">
+                    <span className="nx-inline-icon-indicator">
+                      {inlineInput.mode === 'new-folder' ? (
+                        <svg className="nx-svg-icon folder open" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                        </svg>
+                      ) : (
+                        <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                          <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg>
+                      )}
+                    </span>
                     <input
                       ref={inputRef}
                       type="text"
@@ -720,7 +761,6 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                         if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
                       }}
                       className="nx-inline-textbox"
-                      style={{ width: '95%' }}
                     />
                   </div>
                 </form>
