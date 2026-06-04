@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="logo.png" alt="Nexel IDE Logo" width="96" />
+
 # ⚡ Nexel IDE
 
 ### A premium, minimal code editor built for competitive programmers and engineers.
@@ -18,11 +20,11 @@
 
 ---
 
-## 🎬 Video Demonstration
+## 🎬 Interactive Demonstration
 
 See Nexel IDE, autocomplete, and the gamified CP judge in action:
 
-<video src="recording.mp4" controls width="100%" style="border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.4); margin-bottom: 24px;"></video>
+![Demo Video](recording.gif)
 
 ---
 
