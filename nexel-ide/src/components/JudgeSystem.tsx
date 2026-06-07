@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './JudgeSystem.css';
 
 interface TestCase {
@@ -27,6 +27,27 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [showAcEffect, setShowAcEffect] = useState<boolean>(false);
   const [showWaEffect, setShowWaEffect] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleImport = (e: Event) => {
+      const customEvent = e as CustomEvent<Array<{ input: string; output: string }>>;
+      if (customEvent.detail && Array.isArray(customEvent.detail)) {
+        const mapped = customEvent.detail.map((tc, idx) => ({
+          id: idx + 1,
+          name: `TC ${idx + 1}`,
+          input: tc.input,
+          expected: tc.output,
+          actual: '',
+          verdict: 'IDLE' as const
+        }));
+        setTestCases(mapped);
+        setActiveTCId(1);
+        setActiveTab('input');
+      }
+    };
+    window.addEventListener('nx-import-samples', handleImport);
+    return () => window.removeEventListener('nx-import-samples', handleImport);
+  }, []);
 
   const activeTC = testCases.find(tc => tc.id === activeTCId) || testCases[0];
 

@@ -35,6 +35,16 @@ export interface INexelAPI {
     passed?: boolean;
     diff?: string;
   }>>;
+  fetchContests: (
+    workspaceDir?: string | null
+  ) => Promise<{
+    active: any[];
+    upcoming: any[];
+    passed: any[];
+  }>;
+  fetchContestProblems: (
+    contestId: number | string
+  ) => Promise<any>;
 }
 
 declare global {

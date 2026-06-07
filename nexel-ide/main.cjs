@@ -210,6 +210,85 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('judge:fetch-contests', async (event, workspaceDir) => {
+    try {
+      const response = await fetch('https://codeforces.com/api/contest.list?gym=false');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.status !== 'OK') {
+        throw new Error(`API error: ${data.comment || 'Unknown error'}`);
+      }
+      const contests = data.result;
+      const active = contests.filter(c => c.phase === 'CODING');
+      const passed = contests
+        .filter(c => c.phase === 'FINISHED')
+        .sort((a, b) => b.startTimeSeconds - a.startTimeSeconds)
+        .slice(0, 2);
+      const upcomingCount = active.length > 0 ? 2 : 3;
+      const upcoming = contests
+        .filter(c => c.phase === 'BEFORE')
+        .sort((a, b) => a.startTimeSeconds - b.startTimeSeconds)
+        .slice(0, upcomingCount);
+
+      const categorized = { active, upcoming, passed };
+
+      return categorized;
+    } catch (err) {
+      console.error("Failed to fetch contests in main process:", err);
+      throw err;
+    }
+  });
+
+  ipcMain.handle('judge:fetch-problems', async (event, contestId) => {
+    try {
+      const nexelJudgeDir = path.join(__dirname, '..', 'nexel-judge');
+      const outFile = path.join(nexelJudgeDir, `questions_${contestId}.json`);
+
+      // Run cf_problems.js via node child_process
+      return new Promise((resolve, reject) => {
+        const scriptPath = path.join(nexelJudgeDir, 'cf_problems.js');
+        const child = spawn('node', [scriptPath, contestId.toString()], {
+          cwd: nexelJudgeDir,
+          env: {
+            ...process.env,
+            NON_INTERACTIVE: 'true'
+          }
+        });
+
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', data => { stdout += data.toString(); });
+        child.stderr.on('data', data => { stderr += data.toString(); });
+
+        child.on('close', async (code) => {
+          if (code === 0) {
+            try {
+              const fileContent = await fs.readFile(outFile, 'utf8');
+              resolve(JSON.parse(fileContent));
+              // Clean up temporary scraped file from disk to save storage
+              fs.unlink(outFile).catch(err => console.error("Failed to delete temp problems file:", err));
+            } catch (err) {
+              reject(new Error(`Failed to read output file: ${err.message}`));
+            }
+          } else {
+            reject(new Error(stderr || stdout || `Scraper exited with code ${code}`));
+          }
+        });
+
+        child.on('error', err => {
+          reject(new Error(`Failed to start scraper process: ${err.message}`));
+        });
+      });
+
+    } catch (err) {
+      console.error("Failed to fetch contest problems:", err);
+      throw err;
+    }
+  });
+
   const startUrl = process.env.ELECTRON_START_URL || 'http://localhost:5173';
   mainWindow.loadURL(startUrl);
 

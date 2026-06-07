@@ -29,5 +29,9 @@ contextBridge.exposeInMainWorld('nexelAPI', {
 
   // Competitive Programming Judge Integration
   runJudge: (filePath, testCases, timeLimit, memoryLimit) => 
-    ipcRenderer.invoke('judge:run', filePath, testCases, timeLimit, memoryLimit)
+    ipcRenderer.invoke('judge:run', filePath, testCases, timeLimit, memoryLimit),
+  fetchContests: (workspaceDir) =>
+    ipcRenderer.invoke('judge:fetch-contests', workspaceDir),
+  fetchContestProblems: (contestId) =>
+    ipcRenderer.invoke('judge:fetch-problems', contestId)
 });

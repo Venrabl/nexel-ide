@@ -5,6 +5,7 @@ import { Editor } from './components/Editor';
 import { TitleBar } from './components/TitleBar';
 import { Terminal } from './components/Terminal';
 import { JudgeSystem } from './components/JudgeSystem';
+import { ContestsSystem } from './components/ContestsSystem';
 import './App.css';
 
 function App() {
@@ -25,9 +26,9 @@ function App() {
   };
 
   const handleSelectSection = (id: string) => {
-    if (id === 'workspace' || id === 'judge') {
+    if (id === 'workspace' || id === 'judge' || id === 'contests') {
       if (currentSection === id) {
-        // Toggle collapse state when clicking active workspace or judge icon
+        // Toggle collapse state when clicking active workspace, judge or contests icon
         setSidebarCollapsed(!sidebarCollapsed);
         setIsHoverRevealed(false);
       } else {
@@ -133,7 +134,7 @@ function App() {
         <div 
           className={`nx-sidebar-container ${sidebarCollapsed ? 'collapsed' : ''}`}
           style={{ 
-            display: (currentSection === 'workspace' || currentSection === 'judge') ? 'flex' : 'none',
+            display: (currentSection === 'workspace' || currentSection === 'judge' || currentSection === 'contests') ? 'flex' : 'none',
             transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             height: '100%'
           }}
@@ -146,6 +147,9 @@ function App() {
           </div>
           <div style={{ display: currentSection === 'judge' ? 'flex' : 'none', height: '100%', width: '100%' }}>
             <JudgeSystem activeFilePath={activeFilePath} />
+          </div>
+          <div style={{ display: currentSection === 'contests' ? 'flex' : 'none', height: '100%', width: '100%' }}>
+            <ContestsSystem />
           </div>
         </div>
 
@@ -160,7 +164,7 @@ function App() {
           position: 'relative'
         }}>
           {/* Editor panel is always mounted but toggled using CSS to prevent vanishing tabs */}
-          <div style={{ display: (currentSection === 'workspace' || currentSection === 'judge') ? 'flex' : 'none', width: '100%', height: '100%' }}>
+          <div style={{ display: (currentSection === 'workspace' || currentSection === 'judge' || currentSection === 'contests') ? 'flex' : 'none', width: '100%', height: '100%' }}>
             <Editor 
               activeFilePath={activeFilePath} 
               onFileSelect={handleFileSelect}

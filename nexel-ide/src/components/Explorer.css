@@ -2,7 +2,7 @@
 .nx-sidebar-container {
   width: 290px;
   min-width: 290px;
-  height: 100vh;
+  height: 100%;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
               opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
               width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,7 +39,7 @@
 /* --- PREMIUM MINIMAL MONOCHROME WORKSPACE EXPLORER --- */
 .nx-explorer-wrapper {
   width: 290px;
-  height: 100vh;
+  height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

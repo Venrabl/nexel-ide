@@ -193,13 +193,14 @@
   box-sizing: border-box;
 }
 
-/* Welcome Backdrop style */
 .nx-editor-welcome-backdrop {
-  flex-grow: 1;
+  height: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #050507;
+  box-sizing: border-box;
 }
 
 .nx-welcome-glass-plate {
@@ -657,4 +658,463 @@
 
 .nx-editor-tab.active.ac-celebrate-glow {
   animation: tab-glow-wash 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Codeforces Problem Statement Viewer Styles */
+/* Codeforces Problem Statement Viewer Styles */
+.nx-cf-problem-viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #09090b 0%, #030305 100%);
+  color: rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+}
+
+.nx-cf-problem-header {
+  padding: 24px 32px;
+  background: rgba(10, 10, 12, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nx-cf-problem-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 23px;
+  font-weight: 700;
+  background: linear-gradient(to right, #ffffff, #b3b3b3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.nx-cf-problem-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.nx-cf-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.01);
+  transition: all 0.2s ease;
+}
+
+.nx-cf-meta-chip:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.nx-cf-meta-chip .label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.08em;
+}
+
+.nx-cf-meta-chip .value {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #34d399; /* Emerald highlights */
+}
+
+.nx-cf-import-btn {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  font-family: 'Outfit', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.03);
+  transition: all 0.25s ease;
+}
+
+.nx-cf-import-btn:hover {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+}
+
+.nx-import-icon {
+  width: 9px;
+  height: 9px;
+  fill: currentColor;
+}
+
+.nx-cf-problem-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+.nx-cf-problem-body::-webkit-scrollbar {
+  width: 5px;
+}
+.nx-cf-problem-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nx-cf-problem-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 99px;
+}
+.nx-cf-problem-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nx-cf-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-cf-section:hover {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.nx-cf-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #10b981;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  border-left: none;
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nx-cf-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.nx-cf-section p {
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+}
+
+.nx-cf-section p:not(:last-child) {
+  margin-bottom: 12px;
+}
+
+/* Sample test formatting */
+.nx-cf-samples-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.nx-cf-sample-box {
+  background: rgba(255, 255, 255, 0.005);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.nx-cf-sample-header {
+  height: 34px;
+  background: rgba(255, 255, 255, 0.015);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.nx-sample-num {
+  font-family: 'Outfit', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.nx-cf-sample-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nx-cf-copy-sample-btn {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Outfit', sans-serif;
+  font-size: 9px;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: 20px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nx-cf-copy-sample-btn:hover {
+  background: rgba(52, 211, 153, 0.06);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #34d399;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.15);
+}
+
+.nx-cf-sample-grid {
+  display: flex;
+  width: 100%;
+}
+
+.nx-cf-sample-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.nx-cf-sample-column:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.nx-cf-sample-label {
+  padding: 6px 16px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.nx-cf-sample-pre {
+  margin: 0;
+  padding: 16px;
+  background: #050507;
+  flex: 1;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.nx-cf-sample-pre code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Math equations inside statements */
+.tex-graphics, .tex-span, .tex-formula {
+  font-family: ui-monospace, Consolas, "Courier New", Courier, monospace;
+  color: #34d399; /* Green hue matching standard IDE colors */
+  padding: 0 4px;
+  border-radius: 4px;
+  font-style: italic;
+}
+.tex-formula {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  margin: 12px 0;
+}
+
+/* --- SPLIT PANE WORKSPACE SYSTEM --- */
+.nx-tab-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nx-tab-split-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.nx-tab-split-btn:hover {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.08);
+}
+
+.nx-tab-split-btn.active {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.15);
+}
+
+.nx-editor-main-container {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.nx-editor-split-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  background: #050507;
+  padding-top: 56px; /* Offset the main floating tab bar */
+  box-sizing: border-box;
+}
+
+.nx-editor-split-pane {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #050507;
+  box-sizing: border-box;
+}
+
+.nx-editor-split-pane.left {
+  border-right: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+/* Remove duplicate padding for Monaco editor when in split pane */
+.nx-editor-split-pane .nx-editor-workspace-area {
+  padding-top: 0 !important;
+}
+
+.nx-editor-split-divider {
+  width: 10px;
+  margin: 0 -5px;
+  z-index: 100;
+  cursor: col-resize;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.nx-divider-glow-line {
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.nx-editor-split-divider:hover {
+  background: rgba(52, 211, 153, 0.02);
+}
+
+.nx-editor-split-divider:hover .nx-divider-glow-line,
+.nx-editor-split-divider.dragging .nx-divider-glow-line {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.nx-right-pane-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #050507;
+}
+
+.nx-right-pane-header {
+  height: 32px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(13, 13, 16, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9;
+}
+
+.nx-right-pane-title {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.nx-right-pane-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.nx-right-pane-close:hover {
+  color: #ff6e6e;
+  background: rgba(255, 110, 110, 0.08);
+}
+
+.nx-right-pane-content {
+  flex-grow: 1;
+  width: 100%;
+  height: calc(100% - 32px);
+  overflow: hidden;
 }

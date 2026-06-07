@@ -26,9 +26,49 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const [acCelebration, setAcCelebration] = useState<boolean>(false);
   
+  // Split pane system states
+  const [isSplit, setIsSplit] = useState<boolean>(false);
+  const [rightTabPath, setRightTabPath] = useState<string | null>(null);
+  const [splitRatio, setSplitRatio] = useState<number>(50);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  
+  const containerRef = useRef<HTMLDivElement>(null);
   const autoSaveIntervalRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
   const completionProviderRef = useRef<any>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const relativeX = e.clientX - rect.left;
+      const percentage = (relativeX / rect.width) * 100;
+      
+      // Enforce bounds (min 20%, max 80%) for visual premium feel
+      if (percentage > 20 && percentage < 80) {
+        setSplitRatio(percentage);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   // Clean up completion provider on unmount
   useEffect(() => {
@@ -63,6 +103,36 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     return () => window.removeEventListener('nx-open-snippets', handleOpenSnippets);
   }, []);
 
+  // Open Codeforces Problem Tab global listener
+  useEffect(() => {
+    const handleOpenProblem = (e: Event) => {
+      const customEvent = e as CustomEvent<{ contestId: number; problem: any }>;
+      if (!customEvent.detail || !customEvent.detail.problem) return;
+      const { contestId, problem } = customEvent.detail;
+      const tabPath = `cf://${contestId}/${problem.index}`;
+      const tabName = `CF ${contestId}${problem.index}`;
+
+      setTabs(prev => {
+        const existing = prev.find(t => t.filePath === tabPath);
+        if (existing) {
+          setActiveTabPath(tabPath);
+          return prev;
+        }
+        const newTab: EditorTab = {
+          filePath: tabPath,
+          name: tabName,
+          content: JSON.stringify(problem),
+          originalContent: JSON.stringify(problem),
+          isDirty: false
+        };
+        setActiveTabPath(tabPath);
+        return [...prev, newTab];
+      });
+    };
+    window.addEventListener('nx-open-cf-problem', handleOpenProblem);
+    return () => window.removeEventListener('nx-open-cf-problem', handleOpenProblem);
+  }, []);
+
   // Listen for AC celebration event to flash green glow wash
   useEffect(() => {
     const handleAc = () => {
@@ -73,6 +143,24 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     return () => window.removeEventListener('nx-ac-celebration', handleAc);
   }, []);
 
+  const toggleSplitTab = (path: string) => {
+    if (isSplit && rightTabPath === path) {
+      setIsSplit(false);
+      setRightTabPath(null);
+    } else {
+      setIsSplit(true);
+      setRightTabPath(path);
+      // Switch active left tab if it matches the one being split to the right
+      if (activeTabPath === path) {
+        const otherTab = tabs.find(t => t.filePath !== path);
+        if (otherTab) {
+          setActiveTabPath(otherTab.filePath);
+          onFileSelect(otherTab.filePath);
+        }
+      }
+    }
+  };
+
   const closeAllTabs = () => {
     setShowMenu(false);
     const hasDirty = tabs.some(t => t.isDirty);
@@ -82,6 +170,8 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     }
     setTabs([]);
     setActiveTabPath(null);
+    setIsSplit(false);
+    setRightTabPath(null);
     if (onCloseFile) onCloseFile("");
   };
 
@@ -89,6 +179,13 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     setShowMenu(false);
     const remaining = tabs.filter(t => t.isDirty);
     setTabs(remaining);
+    
+    // Reset split tab if it was among closed tabs
+    if (rightTabPath && !remaining.some(t => t.filePath === rightTabPath)) {
+      setIsSplit(false);
+      setRightTabPath(null);
+    }
+
     if (remaining.length > 0) {
       if (!remaining.some(t => t.filePath === activeTabPath)) {
         const nextActive = remaining[remaining.length - 1].filePath;
@@ -214,10 +311,10 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     }
   };
 
-  const handleEditorChange = (value: string | undefined) => {
+  const handleEditorChangeForTab = (path: string, value: string | undefined) => {
     const updatedValue = value || '';
     setTabs(prev => prev.map(t => 
-      t.filePath === activeTabPath 
+      t.filePath === path 
         ? { ...t, content: updatedValue, isDirty: updatedValue !== t.originalContent }
         : t
     ));
@@ -228,6 +325,11 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     if (tabToClose?.isDirty) {
       const confirmClose = window.confirm(`File "${tabToClose.name}" has unsaved changes. Close anyway?`);
       if (!confirmClose) return;
+    }
+
+    if (rightTabPath === path) {
+      setIsSplit(false);
+      setRightTabPath(null);
     }
 
     const remainingTabs = tabs.filter(t => t.filePath !== path);
@@ -408,8 +510,75 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     };
   };
 
+  const renderWelcomeBackdrop = () => (
+    <div className="nx-editor-welcome-backdrop">
+      <div className="nx-welcome-glass-plate">
+        <div className="nx-welcome-branding-wrapper">
+          <img src={logoImg} className="nx-welcome-logo" alt="Nexel IDE Logo" />
+          <h1 className="nx-welcome-headline">NEXEL IDE</h1>
+        </div>
+        <p className="nx-welcome-subtitle">A premium minimal workspace with native Monaco integration.</p>
+        <div className="nx-shortcut-box">
+          <div className="nx-shortcut-row"><span>Open Workspace Folder</span> <kbd>Click Explorer Header</kbd></div>
+          <div className="nx-shortcut-row"><span>Create New File</span> <kbd>Right Click in Sidebar</kbd></div>
+          <div className="nx-shortcut-row"><span>Save Working Changes</span> <kbd>Ctrl + S</kbd></div>
+          <div className="nx-shortcut-row"><span>Close Active Tab</span> <kbd>Ctrl + W</kbd></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderTabContent = (tab: EditorTab) => {
+    if (tab.filePath === 'nexel://snippets') {
+      return <SnippetsViewer snippetsData={snippets} />;
+    } else if (tab.filePath.startsWith('cf://')) {
+      try {
+        const parsed = JSON.parse(tab.content);
+        return <ContestProblemViewer problemData={parsed} />;
+      } catch (e) {
+        console.error("Failed to parse problem statement JSON:", e);
+        return (
+          <div className="nx-contests-status-msg error">
+            <p>Error rendering problem statement: Invalid data format.</p>
+          </div>
+        );
+      }
+    } else {
+      return (
+        <div className="nx-editor-workspace-area">
+          <MonacoEditor
+            height="100%"
+            language={getLanguage(tab.name)}
+            value={tab.content}
+            onChange={(val) => handleEditorChangeForTab(tab.filePath, val)}
+            onMount={handleEditorDidMount}
+            options={{
+              fontSize: 13,
+              fontFamily: 'Consolas, "Courier New", Courier, monospace',
+              minimap: { enabled: false },
+              scrollbar: {
+                vertical: 'visible',
+                horizontal: 'visible',
+                verticalScrollbarSize: 8,
+                horizontalScrollbarSize: 8,
+              },
+              lineNumbersMinChars: 3,
+              automaticLayout: true,
+              cursorBlinking: 'smooth',
+              cursorSmoothCaretAnimation: 'on',
+              padding: { top: 16 },
+              tabSize: 2,
+            }}
+          />
+        </div>
+      );
+    }
+  };
+
+  const rightTab = tabs.find(t => t.filePath === rightTabPath);
+
   return (
-    <div className={`nx-editor-canvas ${acCelebration ? 'ac-celebrate-glow' : ''}`}>
+    <div ref={containerRef} className={`nx-editor-canvas ${acCelebration ? 'ac-celebrate-glow' : ''}`}>
       {/* Floating Premium aesthetic minimal active tabs bar */}
       {tabs.length > 0 && (
         <div className="nx-floating-tabbar-container">
@@ -426,16 +595,31 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
                 >
                   <span className="nx-tab-title">{tab.name}</span>
                   {tab.isDirty && <div className="nx-dirty-indicator-glow" />}
-                  <button 
-                    className="nx-tab-close-btn" 
-                    title="Close Tab"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeTab(tab.filePath);
-                    }}
-                  >
-                    ×
-                  </button>
+                  <div className="nx-tab-actions-group">
+                    <button 
+                      className={`nx-tab-split-btn ${isSplit && rightTabPath === tab.filePath ? 'active' : ''}`}
+                      title={isSplit && rightTabPath === tab.filePath ? "Close Split Pane" : "Split to Right Pane"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSplitTab(tab.filePath);
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <rect x="3" y="3" width="18" height="18" rx="1.5" />
+                        <line x1="12" y1="3" x2="12" y2="21" />
+                      </svg>
+                    </button>
+                    <button 
+                      className="nx-tab-close-btn" 
+                      title="Close Tab"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        closeTab(tab.filePath);
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -490,55 +674,55 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
         </div>
       )}
 
-      {/* Monaco Code Editor Area */}
-      {activeTab ? (
-        activeTab.filePath === 'nexel://snippets' ? (
-          <SnippetsViewer snippetsData={snippets} />
+      {/* Editor Main Content Area (supports Split Layout) */}
+      <div className="nx-editor-main-container">
+        {isSplit ? (
+          <div className="nx-editor-split-container">
+            {/* Left Pane */}
+            <div className="nx-editor-split-pane left" style={{ width: `${splitRatio}%` }}>
+              {activeTab && activeTab.filePath !== rightTabPath ? (
+                renderTabContent(activeTab)
+              ) : (
+                renderWelcomeBackdrop()
+              )}
+            </div>
+
+            {/* Draggable vertical divider */}
+            <div 
+              className={`nx-editor-split-divider ${isDragging ? 'dragging' : ''}`} 
+              onMouseDown={handleMouseDown}
+            >
+              <div className="nx-divider-glow-line" />
+            </div>
+
+            {/* Right Pane */}
+            <div className="nx-editor-split-pane right" style={{ width: `${100 - splitRatio}%` }}>
+              {rightTab ? (
+                <div className="nx-right-pane-wrapper">
+                  <div className="nx-right-pane-header">
+                    <span className="nx-right-pane-title">{rightTab.name}</span>
+                    <button 
+                      className="nx-right-pane-close" 
+                      onClick={() => { setIsSplit(false); setRightTabPath(null); }} 
+                      title="Close Split Pane"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="nx-right-pane-content">
+                    {renderTabContent(rightTab)}
+                  </div>
+                </div>
+              ) : (
+                renderWelcomeBackdrop()
+              )}
+            </div>
+          </div>
         ) : (
-          <div className="nx-editor-workspace-area">
-            <MonacoEditor
-              height="100%"
-              language={getLanguage(activeTab.name)}
-              value={activeTab.content}
-              onChange={handleEditorChange}
-              onMount={handleEditorDidMount}
-              options={{
-                fontSize: 13,
-                fontFamily: 'Consolas, "Courier New", Courier, monospace',
-                minimap: { enabled: false },
-                scrollbar: {
-                  vertical: 'visible',
-                  horizontal: 'visible',
-                  verticalScrollbarSize: 8,
-                  horizontalScrollbarSize: 8,
-                },
-                lineNumbersMinChars: 3,
-                automaticLayout: true,
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-                padding: { top: 16 },
-                tabSize: 2,
-              }}
-            />
-          </div>
-        )
-      ) : (
-        <div className="nx-editor-welcome-backdrop">
-          <div className="nx-welcome-glass-plate">
-            <div className="nx-welcome-branding-wrapper">
-              <img src={logoImg} className="nx-welcome-logo" alt="Nexel IDE Logo" />
-              <h1 className="nx-welcome-headline">NEXEL IDE</h1>
-            </div>
-            <p className="nx-welcome-subtitle">A premium minimal workspace with native Monaco integration.</p>
-            <div className="nx-shortcut-box">
-              <div className="nx-shortcut-row"><span>Open Workspace Folder</span> <kbd>Click Explorer Header</kbd></div>
-              <div className="nx-shortcut-row"><span>Create New File</span> <kbd>Right Click in Sidebar</kbd></div>
-              <div className="nx-shortcut-row"><span>Save Working Changes</span> <kbd>Ctrl + S</kbd></div>
-              <div className="nx-shortcut-row"><span>Close Active Tab</span> <kbd>Ctrl + W</kbd></div>
-            </div>
-          </div>
-        </div>
-      )}
+          /* Standard Single Pane View */
+          activeTab ? renderTabContent(activeTab) : renderWelcomeBackdrop()
+        )}
+      </div>
 
       {/* Status metrics footer */}
       {activeTab && (
@@ -623,3 +807,127 @@ const SnippetsViewer: React.FC<SnippetsViewerProps> = ({ snippetsData }) => {
     </div>
   );
 };
+
+interface ContestProblemViewerProps {
+  problemData: any;
+}
+
+const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ problemData }) => {
+  useEffect(() => {
+    const mj = (window as any).MathJax;
+    if (mj && mj.typesetPromise) {
+      mj.typesetPromise();
+    }
+  }, [problemData.url]);
+
+  const handleImportSamples = () => {
+    if (problemData.testCases && Array.isArray(problemData.testCases)) {
+      window.dispatchEvent(new CustomEvent('nx-import-samples', { detail: problemData.testCases }));
+      alert("Sample test cases successfully imported to Nexel Judge System! Switch to the Judge tab to run them.");
+    }
+  };
+
+  return (
+    <div className="nx-cf-problem-viewer">
+      <div className="nx-cf-problem-header">
+        <h1 className="nx-cf-problem-title">{problemData.index}. {problemData.title}</h1>
+        <div className="nx-cf-problem-meta-row">
+          <div className="nx-cf-meta-chip">
+            <span className="label">TIME LIMIT</span>
+            <span className="value">{problemData.timeLimit}</span>
+          </div>
+          <div className="nx-cf-meta-chip">
+            <span className="label">MEMORY LIMIT</span>
+            <span className="value">{problemData.memoryLimit}</span>
+          </div>
+          <button className="nx-cf-import-btn" onClick={handleImportSamples}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="nx-import-icon">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            IMPORT SAMPLES TO JUDGE
+          </button>
+        </div>
+      </div>
+
+      <div className="nx-cf-problem-body">
+        {/* Description Statement */}
+        {problemData.statement && (
+          <div className="nx-cf-section statement-section">
+            <div dangerouslySetInnerHTML={{ __html: problemData.statement }} />
+          </div>
+        )}
+
+        {/* Input format */}
+        {problemData.inputFormat && (
+          <div className="nx-cf-section">
+            <h3 className="nx-cf-section-title">Input</h3>
+            <div dangerouslySetInnerHTML={{ __html: problemData.inputFormat }} />
+          </div>
+        )}
+
+        {/* Output format */}
+        {problemData.outputFormat && (
+          <div className="nx-cf-section">
+            <h3 className="nx-cf-section-title">Output</h3>
+            <div dangerouslySetInnerHTML={{ __html: problemData.outputFormat }} />
+          </div>
+        )}
+
+        {/* Sample Tests */}
+        {problemData.testCases && problemData.testCases.length > 0 && (
+          <div className="nx-cf-section">
+            <h3 className="nx-cf-section-title">Sample Tests</h3>
+            <div className="nx-cf-samples-stack">
+              {problemData.testCases.map((tc: any, idx: number) => (
+                <div key={idx} className="nx-cf-sample-box">
+                  <div className="nx-cf-sample-header">
+                    <span className="nx-sample-num">Example #{idx + 1}</span>
+                    <div className="nx-cf-sample-actions">
+                      <button 
+                        className="nx-cf-copy-sample-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText(tc.input);
+                          alert(`Sample input #${idx + 1} copied to clipboard!`);
+                        }}
+                      >
+                        Copy Input
+                      </button>
+                      <button 
+                        className="nx-cf-copy-sample-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText(tc.output);
+                          alert(`Sample output #${idx + 1} copied to clipboard!`);
+                        }}
+                      >
+                        Copy Output
+                      </button>
+                    </div>
+                  </div>
+                  <div className="nx-cf-sample-grid">
+                    <div className="nx-cf-sample-column">
+                      <div className="nx-cf-sample-label">INPUT</div>
+                      <pre className="nx-cf-sample-pre"><code>{tc.input}</code></pre>
+                    </div>
+                    <div className="nx-cf-sample-column">
+                      <div className="nx-cf-sample-label">OUTPUT</div>
+                      <pre className="nx-cf-sample-pre"><code>{tc.output}</code></pre>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Note */}
+        {problemData.note && (
+          <div className="nx-cf-section note-section">
+            <h3 className="nx-cf-section-title">Note</h3>
+            <div dangerouslySetInnerHTML={{ __html: problemData.note }} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}, (prev, next) => prev.problemData.url === next.problemData.url);
+

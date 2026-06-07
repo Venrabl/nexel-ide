@@ -62,10 +62,39 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   // Load initial workspace if saved or prompt
+  useEffect(() => {
+    const savedRoot = localStorage.getItem('workspace-root');
+    if (savedRoot) {
+      setRootPath(savedRoot);
+      const parsedName = savedRoot.split(/[\\/]/).pop() || savedRoot;
+      setRootName(parsedName.toUpperCase());
+      refreshTree(savedRoot);
+    }
+  }, []);
+
+  // Sync active folder path to localStorage
+  useEffect(() => {
+    if (!rootPath) {
+      localStorage.removeItem('workspace-active-dir');
+      return;
+    }
+    let activeDir = rootPath;
+    if (lastSelectedNode) {
+      if (lastSelectedNode.type === 'folder') {
+        activeDir = lastSelectedNode.path;
+      } else {
+        const lastSlash = Math.max(lastSelectedNode.path.lastIndexOf('/'), lastSelectedNode.path.lastIndexOf('\\'));
+        activeDir = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
+      }
+    }
+    localStorage.setItem('workspace-active-dir', activeDir);
+  }, [rootPath, lastSelectedNode]);
+
   const handleOpenFolder = async () => {
     try {
       const selectedDir = await window.nexelAPI.openWorkspaceDir();
       if (!selectedDir) return;
+      localStorage.setItem('workspace-root', selectedDir);
       setRootPath(selectedDir);
       const parsedName = selectedDir.split(/[\\/]/).pop() || selectedDir;
       setRootName(parsedName.toUpperCase());
@@ -146,15 +175,18 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     const onOpen = () => handleOpenFolder();
     const onNewFile = () => handleHeaderNewFile();
     const onNewFolder = () => handleHeaderNewFolder();
+    const onRefresh = () => rootPath && refreshTree(rootPath);
 
     window.addEventListener('nx-open-folder', onOpen);
     window.addEventListener('nx-new-file', onNewFile);
     window.addEventListener('nx-new-folder', onNewFolder);
+    window.addEventListener('nx-refresh-explorer', onRefresh);
 
     return () => {
       window.removeEventListener('nx-open-folder', onOpen);
       window.removeEventListener('nx-new-file', onNewFile);
       window.removeEventListener('nx-new-folder', onNewFolder);
+      window.removeEventListener('nx-refresh-explorer', onRefresh);
     };
   }, [rootPath, lastSelectedNode, rootName]);
 
