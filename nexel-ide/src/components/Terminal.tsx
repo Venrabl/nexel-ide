@@ -50,7 +50,9 @@ export const Terminal: React.FC<TerminalProps> = ({ visible, onClose, sidebarCol
       try {
         fitAddon.fit();
         window.nexelAPI.resizeTerminal(term.cols, term.rows);
-      } catch (err) {}
+      } catch {
+        // Ignore terminal resizing errors on layout change
+      }
     }, 100);
 
     xtermInstance.current = term;
@@ -103,7 +105,9 @@ export const Terminal: React.FC<TerminalProps> = ({ visible, onClose, sidebarCol
       try {
         fitAddon.fit();
         window.nexelAPI.resizeTerminal(term.cols, term.rows);
-      } catch (err) {}
+      } catch {
+        // Ignore terminal resizing errors on observer trigger
+      }
     });
     if (terminalRef.current) {
       resizeObserver.observe(terminalRef.current);

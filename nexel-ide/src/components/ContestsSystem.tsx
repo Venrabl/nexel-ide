@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useEditorStore } from '../stores/useEditorStore';
+import { useWorkspaceStore } from '../stores/useWorkspaceStore';
 import './ContestsSystem.css';
 
 interface Contest {
@@ -17,6 +19,20 @@ interface CategorizedContests {
   passed: Contest[];
 }
 
+export interface CFProblem extends Record<string, unknown> {
+  index: string;
+  title?: string;
+  error?: string;
+  url: string;
+  timeLimit: string;
+  memoryLimit: string;
+  statement?: string;
+  inputFormat?: string;
+  outputFormat?: string;
+  note?: string;
+  testCases?: Array<{ input: string; output: string }>;
+}
+
 export const ContestsSystem: React.FC = () => {
   const [contests, setContests] = useState<CategorizedContests | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -24,7 +40,7 @@ export const ContestsSystem: React.FC = () => {
 
   // States for viewing a specific contest's problems
   const [selectedContest, setSelectedContest] = useState<{ id: number; name: string } | null>(null);
-  const [problems, setProblems] = useState<any[] | null>(null);
+  const [problems, setProblems] = useState<CFProblem[] | null>(null);
   const [problemsLoading, setProblemsLoading] = useState<boolean>(false);
 
   // Custom fetch inputs
@@ -39,7 +55,6 @@ export const ContestsSystem: React.FC = () => {
     const raw = customInput.trim();
     if (!raw) return;
 
-    // Matches contest ID followed optionally by problem index (e.g. 1981, 1981A, 1981/A, 1981 A)
     const match = raw.match(/^(\d+)(?:\s*[\/\s-]*\s*([A-Za-z0-9]+))?$/);
     if (!match) {
       alert("Invalid format! Please enter a valid Contest ID (e.g., 1981) or Problem (e.g., 1981A).");
@@ -54,29 +69,28 @@ export const ContestsSystem: React.FC = () => {
 
     try {
       const data = await window.nexelAPI.fetchContestProblems(contestId);
-      const arr = Object.values(data).sort((a: any, b: any) => a.index.localeCompare(b.index));
+      const arr = (Object.values(data) as CFProblem[]).sort((a, b) => a.index.localeCompare(b.index));
       
       setSelectedContest({ id: contestId, name: `Contest ${contestId}` });
       setProblems(arr);
 
       if (problemIndex) {
-        const found = arr.find((p: any) => p.index.toUpperCase() === problemIndex) as any;
+        const found = arr.find((p) => p.index.toUpperCase() === problemIndex);
         if (found) {
           if (found.error) {
             alert(`Error fetching problem: ${found.error}`);
           } else {
-            window.dispatchEvent(new CustomEvent('nx-open-cf-problem', { 
-              detail: { contestId, problem: found } 
-            }));
+            useEditorStore.getState().openCfProblem(contestId, found);
           }
         } else {
-          alert(`Problem ${problemIndex} not found in contest ${contestId}. Available problems: ${arr.map((p: any) => p.index).join(', ')}`);
+          alert(`Problem ${problemIndex} not found in contest ${contestId}. Available problems: ${arr.map((p) => p.index).join(', ')}`);
         }
       }
       setCustomInput('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(`Failed to fetch custom resource: ${err.message || 'Unknown error'}`);
+      const message = err instanceof Error ? err.message : String(err);
+      alert(`Failed to fetch custom resource: ${message || 'Unknown error'}`);
     } finally {
       setCustomLoading(false);
     }
@@ -84,7 +98,7 @@ export const ContestsSystem: React.FC = () => {
 
   const handleOpenToFolder = () => {
     if (!selectedContest) return;
-    const activeDir = localStorage.getItem('workspace-active-dir') || localStorage.getItem('workspace-root');
+    const activeDir = useWorkspaceStore.getState().activeDir || useWorkspaceStore.getState().rootPath;
     if (!activeDir) {
       alert("No active workspace! Please open a workspace folder in the Explorer sidebar first.");
       return;
@@ -100,7 +114,7 @@ export const ContestsSystem: React.FC = () => {
   const confirmOpenToFolder = async () => {
     setShowPrompt(false);
     if (!selectedContest) return;
-    const activeDir = localStorage.getItem('workspace-active-dir') || localStorage.getItem('workspace-root');
+    const activeDir = useWorkspaceStore.getState().activeDir || useWorkspaceStore.getState().rootPath;
     if (!activeDir) return;
 
     const count = parseInt(problemCount, 10);
@@ -110,16 +124,13 @@ export const ContestsSystem: React.FC = () => {
     }
 
     try {
-      // Create folder for the contest, e.g. "2322"
       const contestFolderName = selectedContest.id.toString();
       const contestFolderPath = await window.nexelAPI.createFolder(activeDir, contestFolderName);
 
-      // Read default C++ template
-      const cppTemplate = localStorage.getItem('cpp-template') || '';
+      const cppTemplate = useEditorStore.getState().cppTemplate || '';
 
-      // Generate A.cpp, B.cpp, C.cpp, D.cpp...
       for (let i = 0; i < count; i++) {
-        const problemChar = String.fromCharCode(65 + i); // 'A' is 65
+        const problemChar = String.fromCharCode(65 + i);
         const fileName = `${problemChar}.cpp`;
         const filePath = await window.nexelAPI.createFile(contestFolderPath, fileName);
         if (cppTemplate) {
@@ -127,13 +138,13 @@ export const ContestsSystem: React.FC = () => {
         }
       }
 
-      // Dispatch event to refresh file explorer tree
-      window.dispatchEvent(new CustomEvent('nx-refresh-explorer'));
+      await useWorkspaceStore.getState().refreshTree();
 
       alert(`Successfully created contest folder "${contestFolderName}" in the active folder with ${count} problems!`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(`Failed to create contest folder: ${err.message || 'Unknown error'}`);
+      const message = err instanceof Error ? err.message : String(err);
+      alert(`Failed to create contest folder: ${message || 'Unknown error'}`);
     }
   };
 
@@ -142,10 +153,11 @@ export const ContestsSystem: React.FC = () => {
     setError(null);
     try {
       const result = await window.nexelAPI.fetchContests();
-      setContests(result);
-    } catch (err: any) {
+      setContests(result as unknown as CategorizedContests);
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Failed to fetch contests.');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'Failed to fetch contests.');
     } finally {
       setLoading(false);
     }
@@ -173,7 +185,6 @@ export const ContestsSystem: React.FC = () => {
 
   const handleContestClick = async (e: React.MouseEvent, contest: Contest) => {
     if (contest.phase === 'BEFORE') {
-      // Allow default link opening for upcoming contests
       return;
     }
 
@@ -184,17 +195,17 @@ export const ContestsSystem: React.FC = () => {
     setError(null);
     try {
       const data = await window.nexelAPI.fetchContestProblems(contest.id);
-      const arr = Object.values(data).sort((a: any, b: any) => a.index.localeCompare(b.index));
+      const arr = (Object.values(data) as CFProblem[]).sort((a, b) => a.index.localeCompare(b.index));
       setProblems(arr);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Failed to load contest problems.');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message || 'Failed to load contest problems.');
     } finally {
       setProblemsLoading(false);
     }
   };
 
-  // Render detail view if a contest is selected
   if (selectedContest) {
     return (
       <div className="nx-contests-wrapper">
@@ -239,11 +250,14 @@ export const ContestsSystem: React.FC = () => {
                   setProblemsLoading(true);
                   setError(null);
                   window.nexelAPI.fetchContestProblems(selectedContest.id)
-                    .then((data: any) => {
-                      const arr = Object.values(data).sort((a: any, b: any) => a.index.localeCompare(b.index));
+                    .then((data) => {
+                      const arr = (Object.values(data) as CFProblem[]).sort((a, b) => a.index.localeCompare(b.index));
                       setProblems(arr);
                     })
-                    .catch((err: any) => setError(err.message || 'Failed.'))
+                    .catch((err: unknown) => {
+                      const message = err instanceof Error ? err.message : String(err);
+                      setError(message || 'Failed.');
+                    })
                     .finally(() => setProblemsLoading(false));
                 }}
               >
@@ -256,15 +270,13 @@ export const ContestsSystem: React.FC = () => {
             <div className="nx-problems-list">
               <span className="nx-section-title">CONTEST PROBLEMS</span>
               <div className="nx-contests-cards-list">
-                {problems.map((prob: any) => (
+                {problems.map((prob) => (
                   <div 
                     key={prob.index} 
                     className={`nx-problem-row-card ${prob.error ? 'error' : ''}`}
                     onClick={() => {
                       if (!prob.error) {
-                        window.dispatchEvent(new CustomEvent('nx-open-cf-problem', { 
-                          detail: { contestId: selectedContest.id, problem: prob } 
-                        }));
+                        useEditorStore.getState().openCfProblem(selectedContest.id, prob);
                       }
                     }}
                   >

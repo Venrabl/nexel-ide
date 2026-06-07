@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Explorer.css';
-import type { IFileNode } from '../nexel-env';
-
-interface FileNode {
-  name: string;
-  path: string;
-  type: 'file' | 'folder';
-  isOpen?: boolean;
-  children?: FileNode[];
-}
+import { useWorkspaceStore } from '../stores/useWorkspaceStore';
+import type { FileNode } from '../stores/useWorkspaceStore';
 
 interface ContextMenuState {
   visible: boolean;
@@ -17,28 +10,37 @@ interface ContextMenuState {
   node: FileNode | null;
 }
 
-interface InlineInputState {
-  visible: boolean;
-  nodePath: string; // The parent folder path or the target node path to rename
-  mode: 'new-file' | 'new-folder' | 'rename';
-  defaultValue: string;
-}
-
 interface ExplorerProps {
   onFileSelect?: (filePath: string, isDoubleClicked?: boolean) => void;
   activeFilePath?: string | null;
 }
 
 export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath }) => {
-  const [rootPath, setRootPath] = useState<string | null>(null);
-  const [rootName, setRootName] = useState<string>('NO WORKSPACE');
-  const [tree, setTree] = useState<FileNode[]>([]);
-  const [pinnedPaths, setPinnedPaths] = useState<string[]>([]);
-  
-  // Search & Filters State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isRegex, setIsRegex] = useState(false);
-  const [isMatchCase, setIsMatchCase] = useState(false);
+  const {
+    rootPath,
+    rootName,
+    tree,
+    pinnedPaths,
+    searchQuery,
+    isRegex,
+    isMatchCase,
+    lastSelectedNode,
+    inlineInput,
+    togglePin,
+    setSearchQuery,
+    setRegex,
+    setMatchCase,
+    setLastSelectedNode,
+    setInlineInput,
+    openWorkspaceDir,
+    refreshTree,
+    toggleFolder,
+    collapseAllFolders,
+    triggerHeaderNewFile,
+    triggerHeaderNewFolder,
+    handleDeleteNode,
+    handleInlineSubmit,
+  } = useWorkspaceStore();
 
   // Context Menu State
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -48,116 +50,15 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     node: null
   });
 
-  // Inline Input State for File/Folder creation or renaming
-  const [inlineInput, setInlineInput] = useState<InlineInputState>({
-    visible: false,
-    nodePath: '',
-    mode: 'new-file',
-    defaultValue: ''
-  });
-
-  const [lastSelectedNode, setLastSelectedNode] = useState<FileNode | null>(null);
-  
   const inputRef = useRef<HTMLInputElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  // Load initial workspace if saved or prompt
+  // Load initial workspace tree if rootPath is restored by Zustand
   useEffect(() => {
-    const savedRoot = localStorage.getItem('workspace-root');
-    if (savedRoot) {
-      setRootPath(savedRoot);
-      const parsedName = savedRoot.split(/[\\/]/).pop() || savedRoot;
-      setRootName(parsedName.toUpperCase());
-      refreshTree(savedRoot);
+    if (rootPath && tree.length === 0) {
+      refreshTree();
     }
-  }, []);
-
-  // Sync active folder path to localStorage
-  useEffect(() => {
-    if (!rootPath) {
-      localStorage.removeItem('workspace-active-dir');
-      return;
-    }
-    let activeDir = rootPath;
-    if (lastSelectedNode) {
-      if (lastSelectedNode.type === 'folder') {
-        activeDir = lastSelectedNode.path;
-      } else {
-        const lastSlash = Math.max(lastSelectedNode.path.lastIndexOf('/'), lastSelectedNode.path.lastIndexOf('\\'));
-        activeDir = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
-      }
-    }
-    localStorage.setItem('workspace-active-dir', activeDir);
-  }, [rootPath, lastSelectedNode]);
-
-  const handleOpenFolder = async () => {
-    try {
-      const selectedDir = await window.nexelAPI.openWorkspaceDir();
-      if (!selectedDir) return;
-      localStorage.setItem('workspace-root', selectedDir);
-      setRootPath(selectedDir);
-      const parsedName = selectedDir.split(/[\\/]/).pop() || selectedDir;
-      setRootName(parsedName.toUpperCase());
-      setLastSelectedNode(null);
-      await refreshTree(selectedDir);
-    } catch (error) {
-      console.error("Workspace mount failure:", error);
-    }
-  };
-
-  const getOpenFolderPaths = (nodes: FileNode[]): Set<string> => {
-    const paths = new Set<string>();
-    const traverse = (nodeList: FileNode[]) => {
-      for (const node of nodeList) {
-        if (node.type === 'folder' && node.isOpen) {
-          paths.add(node.path);
-        }
-        if (node.children) {
-          traverse(node.children);
-        }
-      }
-    };
-    traverse(nodes);
-    return paths;
-  };
-
-  const refreshTree = async (pathTarget: string, forceOpenPaths?: Set<string>) => {
-    try {
-      const data = await window.nexelAPI.readWorkspaceFiles(pathTarget);
-      if (!data) return;
-      
-      let nodesArray: IFileNode[] = [];
-      if (Array.isArray(data)) {
-        nodesArray = data;
-      } else if (data && typeof data === 'object') {
-        const d = data as any;
-        if (d.children && Array.isArray(d.children)) {
-          nodesArray = d.children;
-        } else {
-          nodesArray = [data as IFileNode];
-        }
-      }
-      
-      const openPaths = getOpenFolderPaths(tree);
-      if (forceOpenPaths) {
-        forceOpenPaths.forEach(p => openPaths.add(p));
-      }
-      
-      setTree(transformNodes(nodesArray, openPaths));
-    } catch (e) {
-      console.error("Workspace tree hydration failure:", e);
-    }
-  };
-
-  const transformNodes = (nodes: IFileNode[], openPaths: Set<string> = new Set()): FileNode[] => {
-    return nodes.map((node) => ({
-      name: node.name,
-      path: node.path,
-      type: node.type,
-      isOpen: node.type === 'folder' && openPaths.has(node.path),
-      children: node.children ? transformNodes(node.children, openPaths) : [],
-    }));
-  };
+  }, [rootPath, tree.length, refreshTree]);
 
   // Close context menu when clicking elsewhere
   useEffect(() => {
@@ -169,26 +70,6 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     window.addEventListener('click', clickHandler);
     return () => window.removeEventListener('click', clickHandler);
   }, []);
-
-  // Titlebar Menu Custom Event bindings
-  useEffect(() => {
-    const onOpen = () => handleOpenFolder();
-    const onNewFile = () => handleHeaderNewFile();
-    const onNewFolder = () => handleHeaderNewFolder();
-    const onRefresh = () => rootPath && refreshTree(rootPath);
-
-    window.addEventListener('nx-open-folder', onOpen);
-    window.addEventListener('nx-new-file', onNewFile);
-    window.addEventListener('nx-new-folder', onNewFolder);
-    window.addEventListener('nx-refresh-explorer', onRefresh);
-
-    return () => {
-      window.removeEventListener('nx-open-folder', onOpen);
-      window.removeEventListener('nx-new-file', onNewFile);
-      window.removeEventListener('nx-new-folder', onNewFolder);
-      window.removeEventListener('nx-refresh-explorer', onRefresh);
-    };
-  }, [rootPath, lastSelectedNode, rootName]);
 
   // Autofocus inline input and select text
   useEffect(() => {
@@ -205,35 +86,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
         inputRef.current.select();
       }
     }
-  }, [inlineInput.visible]);
-
-  // Recursively toggles folder open state
-  const toggleFolder = (nodePath: string) => {
-    const deepToggle = (nodes: FileNode[]): FileNode[] => {
-      return nodes.map(node => {
-        if (node.path === nodePath && node.type === 'folder') {
-          return { ...node, isOpen: !node.isOpen };
-        }
-        if (node.children) {
-          return { ...node, children: deepToggle(node.children) };
-        }
-        return node;
-      });
-    };
-    setTree(deepToggle(tree));
-  };
-
-  const collapseAllFolders = () => {
-    const deepCollapse = (nodes: FileNode[]): FileNode[] => {
-      return nodes.map(node => {
-        if (node.type === 'folder') {
-          return { ...node, isOpen: false, children: node.children ? deepCollapse(node.children) : [] };
-        }
-        return node;
-      });
-    };
-    setTree(deepCollapse(tree));
-  };
+  }, [inlineInput.visible, inlineInput.mode, inlineInput.defaultValue]);
 
   // Drag and Drop implementation
   const handleDragStart = (e: React.DragEvent, node: FileNode) => {
@@ -264,7 +117,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
 
     try {
       await window.nexelAPI.renameNode(sourcePath, newPath);
-      if (rootPath) refreshTree(rootPath);
+      await refreshTree();
     } catch (err) {
       console.error("Drop relocate operation failed:", err);
     }
@@ -275,7 +128,6 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     e.preventDefault();
     e.stopPropagation();
     
-    // Estimate menu height based on node type
     const menuHeight = node.type === 'folder' ? 220 : 180;
     const adjustedY = e.clientY + menuHeight > window.innerHeight 
       ? Math.max(10, e.clientY - menuHeight) 
@@ -302,7 +154,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
       visible: true,
       x: e.clientX,
       y: adjustedY,
-      node: { name: rootName, path: rootPath, type: 'folder' } // Root folder context
+      node: { name: rootName, path: rootPath, type: 'folder' }
     });
   };
 
@@ -326,36 +178,6 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     });
   };
 
-  const handleHeaderNewFile = () => {
-    if (!rootPath) return;
-    let parentNode: FileNode = { name: rootName, path: rootPath, type: 'folder' };
-    if (lastSelectedNode) {
-      if (lastSelectedNode.type === 'folder') {
-        parentNode = lastSelectedNode;
-      } else {
-        const lastSlash = lastSelectedNode.path.lastIndexOf('/');
-        const parentPath = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
-        parentNode = { name: '', path: parentPath, type: 'folder' };
-      }
-    }
-    triggerNewFile(parentNode);
-  };
-
-  const handleHeaderNewFolder = () => {
-    if (!rootPath) return;
-    let parentNode: FileNode = { name: rootName, path: rootPath, type: 'folder' };
-    if (lastSelectedNode) {
-      if (lastSelectedNode.type === 'folder') {
-        parentNode = lastSelectedNode;
-      } else {
-        const lastSlash = lastSelectedNode.path.lastIndexOf('/');
-        const parentPath = lastSlash !== -1 ? lastSelectedNode.path.substring(0, lastSlash) : rootPath;
-        parentNode = { name: '', path: parentPath, type: 'folder' };
-      }
-    }
-    triggerNewFolder(parentNode);
-  };
-
   const triggerRename = (node: FileNode) => {
     setContextMenu(prev => ({ ...prev, visible: false }));
     setInlineInput({
@@ -366,125 +188,23 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
     });
   };
 
-  const handleDelete = async (node: FileNode) => {
-    setContextMenu(prev => ({ ...prev, visible: false }));
-    const isFolder = node.type === 'folder';
-    const confirmMessage = isFolder 
-      ? `Are you absolutely sure you want to permanently delete the folder "${node.name}" and all of its contents?`
-      : `Are you absolutely sure you want to permanently delete the file "${node.name}"?`;
-      
-    const confirmDelete = window.confirm(confirmMessage);
-    if (!confirmDelete) return;
-
-    try {
-      await window.nexelAPI.deleteNode(node.path);
-      // Unpin if pinned
-      setPinnedPaths(prev => prev.filter(p => p !== node.path));
-      if (rootPath) refreshTree(rootPath);
-    } catch (err) {
-      console.error("Deletion failed:", err);
-    }
-  };
-
-  const handleTogglePin = (node: FileNode) => {
-    setContextMenu(prev => ({ ...prev, visible: false }));
-    setPinnedPaths(prev => 
-      prev.includes(node.path) ? prev.filter(p => p !== node.path) : [...prev, node.path]
-    );
-  };
-
-  const handleCopyPath = (node: FileNode) => {
-    setContextMenu(prev => ({ ...prev, visible: false }));
-    navigator.clipboard.writeText(node.path);
-  };
-
-  // Submit Inline Input (Create / Rename)
-  const handleInlineSubmit = async (e: React.FormEvent) => {
+  const handleInlineSubmitWrapper = async (e: React.FormEvent) => {
     e.preventDefault();
     const value = inputRef.current?.value.trim();
     if (!value) {
-      setInlineInput(prev => ({ ...prev, visible: false }));
+      setInlineInput({ visible: false });
       return;
     }
-
-    try {
-      let createdPath = '';
-      const forceOpenPaths = new Set<string>();
-
-      if (inlineInput.mode === 'new-file') {
-        createdPath = await window.nexelAPI.createFile(inlineInput.nodePath, value);
-        if (inlineInput.nodePath) {
-          forceOpenPaths.add(inlineInput.nodePath.replace(/\\/g, '/'));
-        }
-        if (value.toLowerCase().endsWith('.cpp')) {
-          const cppTemplate = localStorage.getItem('cpp-template');
-          if (cppTemplate) {
-            await window.nexelAPI.writeFileContent(createdPath, cppTemplate);
-          }
-        }
-      } else if (inlineInput.mode === 'new-folder') {
-        createdPath = await window.nexelAPI.createFolder(inlineInput.nodePath, value);
-        if (inlineInput.nodePath) {
-          forceOpenPaths.add(inlineInput.nodePath.replace(/\\/g, '/'));
-        }
-      } else if (inlineInput.mode === 'rename') {
-        const pathSegments = inlineInput.nodePath.split('/');
-        pathSegments.pop();
-        const parentPath = pathSegments.join('/');
-        const targetNewPath = `${parentPath}/${value}`;
-        await window.nexelAPI.renameNode(inlineInput.nodePath, targetNewPath);
-        
-        // Update pinning reference if renamed
-        setPinnedPaths(prev => prev.map(p => p === inlineInput.nodePath ? targetNewPath : p));
-      }
-
-      if (rootPath) {
-        await refreshTree(rootPath, forceOpenPaths);
-      }
-
-      if (inlineInput.mode === 'new-file' && createdPath && onFileSelect) {
-        const formattedPath = createdPath.replace(/\\/g, '/');
-        onFileSelect(formattedPath, true);
-      }
-    } catch (err) {
-      console.error("Inline fs write execution failed:", err);
-      alert(`Operation failed. Ensure a valid name is provided.`);
-    } finally {
-      setInlineInput(prev => ({ ...prev, visible: false }));
-    }
-  };
-
-  // Get Custom Premium Vector Icons based on Extension - Minimal Monochrome
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'ts':
-      case 'tsx':
-      case 'js':
-      case 'jsx':
-      case 'html':
-      case 'css':
-      case 'json':
-      case 'md':
-      case 'cpp':
-      case 'c':
-      case 'h':
-      case 'py':
-      default:
-        return (
-          <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-            <polyline points="13 2 13 9 20 9"></polyline>
-          </svg>
-        );
+    const createdPath = await handleInlineSubmit(value);
+    if (createdPath && onFileSelect) {
+      onFileSelect(createdPath, true);
     }
   };
 
   // Renders the muted/accented extension beautifully
   const renderLabelWithHighlights = (name: string, isSelected: boolean) => {
-    // Implement Search Match Highlights
     if (searchQuery) {
-      let isMatch = false;
+      let isMatch: boolean;
       let q = searchQuery;
       if (!isMatchCase) q = q.toLowerCase();
 
@@ -495,7 +215,9 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
         try {
           const reg = new RegExp(searchQuery, isMatchCase ? '' : 'i');
           isMatch = reg.test(name);
-        } catch(e) {}
+        } catch {
+          isMatch = false;
+        }
       } else {
         isMatch = target.includes(q);
       }
@@ -532,7 +254,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
       return (
         <div key={`${node.path}-${index}`} className="nx-node-block">
           {isInlineEditingThisNode ? (
-            <form onSubmit={handleInlineSubmit} className="nx-inline-input-form" style={{ paddingLeft: `${depth * 14 + 18}px` }}>
+            <form onSubmit={handleInlineSubmitWrapper} className="nx-inline-input-form" style={{ paddingLeft: `${depth * 14 + 18}px` }}>
               <div className="nx-inline-input-wrapper">
                 <span className="nx-inline-icon-indicator">
                   {node.type === 'folder' ? (
@@ -540,16 +262,19 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                     </svg>
                   ) : (
-                    getFileIcon(node.name)
+                    <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                      <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
                   )}
                 </span>
                 <input
                   ref={inputRef}
                   type="text"
                   defaultValue={inlineInput.defaultValue}
-                  onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                  onBlur={() => setInlineInput({ visible: false })}
                   onKeyDown={(e) => {
-                    if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                    if (e.key === 'Escape') setInlineInput({ visible: false });
                   }}
                   className="nx-inline-textbox"
                 />
@@ -596,7 +321,10 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                   </svg>
                 ) : (
-                  getFileIcon(node.name)
+                  <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                  </svg>
                 )}
               </span>
 
@@ -609,7 +337,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                   </button>
                 )}
-                <button className="nx-row-act-btn delete" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(node); }}>
+                <button className="nx-row-act-btn delete" title="Delete" onClick={(e) => { e.stopPropagation(); handleDeleteNode(node); }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
@@ -619,7 +347,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
           {/* Inline creation field inside matching folder tree */}
           {showInlineCreationHere && (
             <div style={{ paddingLeft: `${(depth + 1) * 14 + 18}px` }}>
-              <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
+              <form onSubmit={handleInlineSubmitWrapper} className="nx-inline-input-form">
                 <div className="nx-inline-input-wrapper">
                   <span className="nx-inline-icon-indicator">
                     {inlineInput.mode === 'new-folder' ? (
@@ -637,9 +365,9 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                     ref={inputRef}
                     type="text"
                     defaultValue={inlineInput.defaultValue}
-                    onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                    onBlur={() => setInlineInput({ visible: false })}
                     onKeyDown={(e) => {
-                      if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                      if (e.key === 'Escape') setInlineInput({ visible: false });
                     }}
                     className="nx-inline-textbox"
                   />
@@ -661,7 +389,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
   return (
     <div className="nx-explorer-wrapper">
       <div className="nx-explorer-header">
-        <span className="nx-explorer-title" onClick={handleOpenFolder} title="Click to Switch Working Directories">
+        <span className="nx-explorer-title" onClick={openWorkspaceDir} title="Click to Switch Working Directories">
           {rootName}
         </span>
         
@@ -669,7 +397,7 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
           <button 
             className="nx-action-btn" 
             title="New File" 
-            onClick={handleHeaderNewFile}
+            onClick={triggerHeaderNewFile}
             disabled={!rootPath}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
@@ -677,12 +405,12 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
           <button 
             className="nx-action-btn" 
             title="New Folder" 
-            onClick={handleHeaderNewFolder}
+            onClick={triggerHeaderNewFolder}
             disabled={!rootPath}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
           </button>
-          <button className="nx-action-btn" title="Refresh Tree" onClick={() => rootPath && refreshTree(rootPath)} disabled={!rootPath}>
+          <button className="nx-action-btn" title="Refresh Tree" onClick={() => refreshTree()} disabled={!rootPath}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
           </button>
           <button className="nx-action-btn" title="Collapse All Folders" onClick={collapseAllFolders} disabled={tree.length === 0}>
@@ -706,14 +434,14 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
               <button 
                 className={`nx-search-tog-btn ${isMatchCase ? 'active' : ''}`}
                 title="Match Case"
-                onClick={() => setIsMatchCase(!isMatchCase)}
+                onClick={() => setMatchCase(!isMatchCase)}
               >
                 Aa
               </button>
               <button 
                 className={`nx-search-tog-btn ${isRegex ? 'active' : ''}`}
                 title="Use Regular Expression"
-                onClick={() => setIsRegex(!isRegex)}
+                onClick={() => setRegex(!isRegex)}
               >
                 .*
               </button>
@@ -738,14 +466,19 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                   className={`nx-shelf-item ${activeFilePath === pathStr ? 'active' : ''}`}
                   onClick={() => onFileSelect && onFileSelect(pathStr, false)}
                 >
-                  <span className="nx-shelf-icon-frame">{getFileIcon(nameStr)}</span>
+                  <span className="nx-shelf-icon-frame">
+                    <svg className="nx-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                      <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
+                  </span>
                   <span className="nx-shelf-text">{nameStr}</span>
                   <button 
                     className="nx-shelf-unpin-btn" 
                     title="Unpin File"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setPinnedPaths(prev => prev.filter(p => p !== pathStr));
+                      togglePin(pathStr);
                     }}
                   >
                     ×
@@ -769,14 +502,14 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
       >
         {tree.length === 0 ? (
           <div className="nx-empty-state">
-            <button className="nx-open-prompt-btn" onClick={handleOpenFolder}>Open Folder</button>
+            <button className="nx-open-prompt-btn" onClick={openWorkspaceDir}>Open Folder</button>
           </div>
         ) : (
           <>
             {/* Render root level inline creation form */}
             {inlineInput.visible && inlineInput.nodePath === rootPath && (inlineInput.mode === 'new-file' || inlineInput.mode === 'new-folder') && (
               <div style={{ paddingLeft: '18px', margin: '2px 8px' }}>
-                <form onSubmit={handleInlineSubmit} className="nx-inline-input-form">
+                <form onSubmit={handleInlineSubmitWrapper} className="nx-inline-input-form">
                   <div className="nx-inline-input-wrapper">
                     <span className="nx-inline-icon-indicator">
                       {inlineInput.mode === 'new-folder' ? (
@@ -794,9 +527,9 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                       ref={inputRef}
                       type="text"
                       defaultValue={inlineInput.defaultValue}
-                      onBlur={() => setInlineInput(prev => ({ ...prev, visible: false }))}
+                      onBlur={() => setInlineInput({ visible: false })}
                       onKeyDown={(e) => {
-                        if (e.key === 'Escape') setInlineInput(prev => ({ ...prev, visible: false }));
+                        if (e.key === 'Escape') setInlineInput({ visible: false });
                       }}
                       className="nx-inline-textbox"
                     />
@@ -804,64 +537,49 @@ export const Explorer: React.FC<ExplorerProps> = ({ onFileSelect, activeFilePath
                 </form>
               </div>
             )}
+
             {renderTree(tree)}
           </>
         )}
       </div>
 
-      {/* Floating Custom Glassmorphism Context Menu */}
+      {/* Floating high-fidelity Context Menu */}
       {contextMenu.visible && contextMenu.node && (
         <div 
           ref={contextMenuRef}
-          className="nx-custom-context-menu" 
+          className="nx-context-menu"
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
         >
-          {contextMenu.node.type === 'folder' && (
+          {contextMenu.node.type === 'folder' ? (
             <>
-              <div className="nx-menu-item" onClick={() => triggerNewFile(contextMenu.node!)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                New File
-              </div>
-              <div className="nx-menu-item" onClick={() => triggerNewFolder(contextMenu.node!)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                New Folder
-              </div>
-              <hr className="nx-menu-divider" />
+              <div className="nx-context-item" onClick={() => triggerNewFile(contextMenu.node!)}>New File</div>
+              <div className="nx-context-item" onClick={() => triggerNewFolder(contextMenu.node!)}>New Folder</div>
+              <div className="nx-divider" />
             </>
-          )}
-
-          {contextMenu.node.path !== rootPath && (
-            <div className="nx-menu-item" onClick={() => triggerRename(contextMenu.node!)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              Rename
-            </div>
-          )}
-
-          {contextMenu.node.type === 'file' && (
-            <div className="nx-menu-item" onClick={() => handleTogglePin(contextMenu.node!)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-              {pinnedPaths.includes(contextMenu.node.path) ? 'Unpin File' : 'Pin File'}
-            </div>
-          )}
-
-          <div className="nx-menu-item" onClick={() => handleCopyPath(contextMenu.node!)}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy Full Path
-          </div>
-
-          {contextMenu.node.path !== rootPath && (
+          ) : null}
+          {contextMenu.node.path !== rootPath ? (
             <>
-              <hr className="nx-menu-divider" />
-              <div className="nx-menu-item delete" onClick={() => handleDelete(contextMenu.node!)}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                {contextMenu.node.type === 'folder' ? 'Delete Folder' : 'Delete File'}
+              <div className="nx-context-item" onClick={() => triggerRename(contextMenu.node!)}>Rename...</div>
+              <div className="nx-context-item danger" onClick={() => handleDeleteNode(contextMenu.node!)}>Delete</div>
+              <div className="nx-divider" />
+              <div className="nx-context-item" onClick={() => handleTogglePin(contextMenu.node!)}>
+                {pinnedPaths.includes(contextMenu.node.path) ? 'Unpin File' : 'Pin File to Shelf'}
               </div>
             </>
-          )}
+          ) : null}
+          <div className="nx-context-item" onClick={() => handleCopyPath(contextMenu.node!)}>Copy Path</div>
         </div>
       )}
     </div>
   );
-};
 
-export default Explorer;
+  function handleTogglePin(node: FileNode) {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    togglePin(node.path);
+  }
+
+  function handleCopyPath(node: FileNode) {
+    setContextMenu(prev => ({ ...prev, visible: false }));
+    navigator.clipboard.writeText(node.path);
+  }
+};

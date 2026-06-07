@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useUIStore } from './stores/useUIStore';
+import { useEditorStore } from './stores/useEditorStore';
 import { NavDock } from './components/NavDock';
 import { Explorer } from './components/Explorer';
 import { Editor } from './components/Editor';
@@ -9,70 +11,68 @@ import { ContestsSystem } from './components/ContestsSystem';
 import './App.css';
 
 function App() {
-  const [currentSection, setCurrentSection] = useState<string>('workspace');
-  const [activeFilePath, setActiveFilePath] = useState<string | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-  const [isHoverRevealed, setIsHoverRevealed] = useState<boolean>(false);
-  const [terminalVisible, setTerminalVisible] = useState<boolean>(false);
-  const [templateModalVisible, setTemplateModalVisible] = useState<boolean>(false);
-  const [cppTemplate, setCppTemplate] = useState<string>(() => localStorage.getItem('cpp-template') || '');
+  const {
+    currentSection,
+    sidebarCollapsed,
+    isHoverRevealed,
+    terminalVisible,
+    templateModalVisible,
+    setSection,
+    toggleSidebar,
+    setTerminalVisible,
+    openTemplateModal,
+    setIsHoverRevealed,
+  } = useUIStore();
 
-  const handleFileSelect = (filePath: string) => {
-    setActiveFilePath(filePath);
+  const {
+    activeTabPath,
+    focusedTabPath,
+    cppTemplate,
+    openFile,
+    setCppTemplate,
+    tabs,
+  } = useEditorStore();
+
+  const [tempTemplate, setTempTemplate] = useState('');
+
+  useEffect(() => {
+    if (templateModalVisible) {
+      setTempTemplate(cppTemplate);
+    }
+  }, [templateModalVisible, cppTemplate]);
+
+  const handleFileSelect = async (filePath: string) => {
+    const existing = tabs.find((t) => t.filePath === filePath);
+    if (existing) {
+      useEditorStore.getState().openFile(filePath, existing.name, existing.content);
+    } else {
+      try {
+        const content = await window.nexelAPI.readFileContent(filePath);
+        const name = filePath.split('/').pop() || filePath;
+        openFile(filePath, name, content);
+      } catch (err) {
+        console.error("Failed to read selected file:", err);
+      }
+    }
   };
 
   const handleCloseFile = () => {
-    setActiveFilePath(null);
+    // Setting activeTabPath to null or managing it via editor store
+    useEditorStore.setState({ activeTabPath: null });
   };
 
   const handleSelectSection = (id: string) => {
     if (id === 'workspace' || id === 'judge' || id === 'contests') {
       if (currentSection === id) {
-        // Toggle collapse state when clicking active workspace, judge or contests icon
-        setSidebarCollapsed(!sidebarCollapsed);
-        setIsHoverRevealed(false);
+        toggleSidebar();
       } else {
-        setCurrentSection(id);
-        setSidebarCollapsed(false);
+        setSection(id);
+        useUIStore.setState({ sidebarCollapsed: false });
       }
     } else {
-      setCurrentSection(id);
+      setSection(id);
     }
   };
-
-  // Toggle sidebar event hook
-  useEffect(() => {
-    const handleToggle = () => {
-      setSidebarCollapsed(prev => !prev);
-      setIsHoverRevealed(false);
-    };
-    window.addEventListener('nx-toggle-sidebar', handleToggle);
-    return () => window.removeEventListener('nx-toggle-sidebar', handleToggle);
-  }, []);
-
-  // Terminal toggle and spawn event hooks
-  useEffect(() => {
-    const handleOpen = () => setTerminalVisible(true);
-    const handleToggle = () => setTerminalVisible(prev => !prev);
-
-    window.addEventListener('nx-open-terminal', handleOpen);
-    window.addEventListener('nx-toggle-terminal', handleToggle);
-
-    return () => {
-      window.removeEventListener('nx-open-terminal', handleOpen);
-      window.removeEventListener('nx-toggle-terminal', handleToggle);
-    };
-  }, []);
-
-  // Options C++ template event hook
-  useEffect(() => {
-    const handleOpenTemplate = () => {
-      setCppTemplate(localStorage.getItem('cpp-template') || '');
-      setTemplateModalVisible(true);
-    };
-    window.addEventListener('nx-open-template-settings', handleOpenTemplate);
-    return () => window.removeEventListener('nx-open-template-settings', handleOpenTemplate);
-  }, []);
 
   return (
     <div style={{ 
@@ -142,11 +142,11 @@ function App() {
           <div style={{ display: currentSection === 'workspace' ? 'flex' : 'none', height: '100%', width: '100%' }}>
             <Explorer 
               onFileSelect={handleFileSelect} 
-              activeFilePath={activeFilePath}
+              activeFilePath={focusedTabPath || activeTabPath}
             />
           </div>
           <div style={{ display: currentSection === 'judge' ? 'flex' : 'none', height: '100%', width: '100%' }}>
-            <JudgeSystem activeFilePath={activeFilePath} />
+            <JudgeSystem activeFilePath={focusedTabPath || activeTabPath} />
           </div>
           <div style={{ display: currentSection === 'contests' ? 'flex' : 'none', height: '100%', width: '100%' }}>
             <ContestsSystem />
@@ -166,15 +166,14 @@ function App() {
           {/* Editor panel is always mounted but toggled using CSS to prevent vanishing tabs */}
           <div style={{ display: (currentSection === 'workspace' || currentSection === 'judge' || currentSection === 'contests') ? 'flex' : 'none', width: '100%', height: '100%' }}>
             <Editor 
-              activeFilePath={activeFilePath} 
+              activeFilePath={activeTabPath} 
               onFileSelect={handleFileSelect}
               onCloseFile={handleCloseFile}
             />
           </div>
-
-
         </div>
       </div>
+      
       <Terminal 
         visible={terminalVisible} 
         onClose={() => setTerminalVisible(false)} 
@@ -194,22 +193,22 @@ function App() {
             </p>
             <textarea
               className="nx-template-textarea"
-              value={cppTemplate}
-              onChange={(e) => setCppTemplate(e.target.value)}
+              value={tempTemplate}
+              onChange={(e) => setTempTemplate(e.target.value)}
               placeholder={`#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World!" << endl;\n    return 0;\n}`}
             />
             <div className="nx-template-modal-actions">
               <button 
                 className="nx-template-modal-btn cancel"
-                onClick={() => setTemplateModalVisible(false)}
+                onClick={() => openTemplateModal(false)}
               >
                 Cancel
               </button>
               <button 
                 className="nx-template-modal-btn save"
                 onClick={() => {
-                  localStorage.setItem('cpp-template', cppTemplate);
-                  setTemplateModalVisible(false);
+                  setCppTemplate(tempTemplate);
+                  openTemplateModal(false);
                 }}
               >
                 Save Boilerplate

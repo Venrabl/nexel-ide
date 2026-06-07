@@ -1,167 +1,335 @@
 <div align="center">
 
-<img src="logo.png" alt="Nexel IDE Logo" width="96" />
+<img src="logo.png" alt="Nexel IDE Logo" width="120" />
 
-# ⚡ Nexel IDE
+# NEXEL IDE
 
-### A premium, minimal code editor built for competitive programmers and engineers.
+**The competitive programmer's weapon of choice.**
 
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows%2010%2F11-0078d4?style=for-the-badge&logo=windows&logoColor=white)](#)
-[![Built With: Electron](https://img.shields.io/badge/Electron-42-47848F?style=for-the-badge&logo=electron&logoColor=white)](#)
+[![Electron 42](https://img.shields.io/badge/Electron-42-47848F?style=for-the-badge&logo=electron&logoColor=white)](#)
 [![React 19](https://img.shields.io/badge/React-19-149eca?style=for-the-badge&logo=react&logoColor=white)](#)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#)
-[![Monaco Editor](https://img.shields.io/badge/Monaco-VS_Code_Engine-6f42c1?style=for-the-badge&logo=visualstudiocode&logoColor=white)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](#)
+[![TypeScript 6](https://img.shields.io/badge/TypeScript-6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#)
+[![Monaco](https://img.shields.io/badge/Monaco-Editor-6f42c1?style=for-the-badge&logo=visualstudiocode&logoColor=white)](#)
+[![Vitest](https://img.shields.io/badge/Tested_with-Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)](#)
+[![Playwright](https://img.shields.io/badge/E2E-Playwright-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](#license)
 
-> A frameless, monochrome IDE. Monaco under the hood. A real terminal. A built-in CP judge.  
-> No bloat. No telemetry. Just code.
+A frameless, monochrome desktop IDE with the VS Code editor engine, a sandboxed local judge,<br/>
+live Codeforces integration, 100+ CP snippets, and zero telemetry.
+
+[Features](#-features) · [Demo](#-demo) · [Quick Start](#-quick-start) · [Architecture](#-architecture) · [Testing](#-testing) · [License](#license)
 
 </div>
 
 ---
 
-## 🎬 Interactive Demonstration
+## 🎬 Demo
 
-See Nexel IDE, autocomplete, and the gamified CP judge in action:
+<div align="center">
 
-![Demo Video](recording.gif)
+![Nexel IDE Demo](recording.gif)
 
----
-
-## ✨ What is Nexel IDE?
-
-**Nexel IDE** is a desktop code editor that feels as good as it looks. It is powered by the Monaco Editor engine (the same engine that drives VS Code), wrapped in a hand-crafted, distraction-free UI, and integrates a **local competitive-programming judge** so you can compile, run, and validate your solutions against custom test cases — all without leaving the app.
+</div>
 
 ---
 
-## 🎬 Highlights at a Glance
+## ⚡ Features
 
-| Area | What you get |
-|---|---|
-| 🖥️ **Editor** | Monaco engine with full IntelliSense, multi-cursor support, and language services |
-| 📂 **Workspace** | Recursive file tree, fuzzy search, pinned-shelf bookmarks, and inline file/folder creation |
-| ⌨️ **Terminal** | Real shell (PowerShell / bash) via native `node-pty` bindings |
-| 🏆 **Judge** | Local CP judge: C++/Java/Python execution, AC/WA/TLE/MLE/RE verdicts, and metrics tracking |
-| 🎨 **UI** | Custom frameless window, floating glass dock, hover-reveal sidebar, and monochrome aesthetics |
-| 🔌 **Extensibility** | React 19 + Vite + clean IPC bridge — easily expandable |
+### 🧠 Monaco Editor Core
+
+> The same engine that powers VS Code — customized to its limit.
+
+- **Custom `nexel-minimal-dark` theme** — hand-tuned syntax token colors against a `#050507` canvas
+- **Multi-tab workflow** with dirty indicators, unsaved-change protection, and keyboard shortcuts (`Ctrl+S`, `Ctrl+W`)
+- **Split-pane editing** — vertical split with draggable divider (20–80% ratio), independent focus tracking per pane
+- **Auto-save** with a 5-second polling loop and toggle LED in the toolbar
+- **C++ intelligent autocomplete** powered by a curated 1,600-entry dataset across 6 categories (keywords, containers, algorithms, math, I/O, CP patterns). Auto-strips the `std::` prefix when `using namespace std;` is detected
+- **100+ competitive programming snippets** — DSU, Fenwick Tree, Segment Tree (+ Lazy), Sparse Table, Trie, Ordered Set (PBDS), BFS, DFS, Dijkstra, Bellman-Ford, Floyd-Warshall, Topological Sort, Kosaraju/Tarjan SCC, LCA, Binary/Ternary Search, Matrix Exponentiation, Sieve, KMP, Z-function, Convex Hull, and more. Searchable via a built-in snippet viewer tab
+- **C++ boilerplate templates** — configure default code that auto-injects into every new `.cpp` file
 
 ---
-
-## 🚀 Features
-
-### 🧠 Editor Core & Templates
-- **Monaco-powered** text editing with tabs, dirty markers, and unsaved-change protection
-- **Multi-tab** workflow with "close all" / "close saved" quick actions
-- **Boilerplate template** — set a custom snippet that auto-fills new `.cpp` files upon creation
-- **Cross-platform Monaco theming** matching the IDE's signature monochrome look
-- **Auto-save** toggle and per-file content tracking
-
-### 📂 Workspace Explorer
-- Recursive directory tree with smart ignore for heavy folders (`node_modules`, `.git`, `.vite`)
-- **Search belt** with regex / case-sensitivity toggles and live filtering
-- **Pinned shelf** for rapid hopping between favorite files
-- Inline **create file**, **create folder**, **rename**, and **delete** options
-- One-click "open folder" via the native OS directory picker
-
-### ⌨️ Integrated Terminal
-- Powered by **xterm.js** with a `node-pty` backend — an authentic terminal shell
-- Falls back to a standard `child_process` shell if PTY native bindings are unavailable
-- Theme-matched background (`#0B0B0D`) for a seamless visual flow
 
 ### 🏆 Local Judge System
-- **Multi-language support** out of the box:
-  - `C++` — compiled dynamically with `g++ -std=c++17` (near-instant compilation without heavy optimizations)
-  - `Java` — compiled with `javac`, runs via `java -cp`
-  - `Python` — runs via `python` (Windows) / `python3` (Unix)
-- **Per-test-case verdicts** with color-coded pills: `AC`, `WA`, `TLE`, `MLE`, `RE`
-- **Metrics tracking** — execution time (ms) and peak memory (MB) per test case
-- **Diff view** side-by-side comparison between expected and actual output
-- **Gamified feedback animations**:
-  - 🎉 **Accepted (AC)**: Triggers a soft neon green glow wash across the active editor tab, editor canvas, and judge panel for 1.5 seconds.
-  - ⚠️ **Wrong Answer (WA)**: Shakes the metrics panel horizontally with a crisp motion to alert you.
 
-### 🪟 Window & Aesthetics
-- **Frameless custom title bar** with File / Edit / View / Run / Help menus
-- Window controls (minimize / maximize / close) routed through Electron IPC
-- **Floating glass NavDock** with hover-reveal collapse for maximum screen real estate
-- Custom four-spiked **Shuriken icon** on the NavDock that glows and spins smoothly on hover
+> Compile, run, and validate — without leaving the IDE.
+
+| Capability | Detail |
+|---|---|
+| **Languages** | C++ (`g++ -std=c++17`), Java (`javac` → `java -cp`), Python (`python` / `python3`) |
+| **Verdicts** | `AC` · `WA` · `TLE` · `MLE` · `RE` — color-coded pills per test case |
+| **Metrics** | Execution time (ms) and peak resident memory (MB) per test |
+| **Diff viewer** | Side-by-side line comparison with match/mismatch highlighting |
+| **Gamified feedback** | 🟢 **AC** → neon green glow wash across editor + tab (1.5s). 🔴 **WA** → horizontal shake on metrics panel |
+| **Batch execution** | All test cases run sequentially with real-time "RUNNING" animation per pill |
+
+---
+
+### 🛡️ Sandboxed Execution Engine
+
+> Every student submission runs in a sandbox. No exceptions.
+
+<details>
+<summary><b>Linux / macOS — Bubblewrap (bwrap)</b></summary>
+
+- `--unshare-all` — isolates IPC, network, PID, UTS, and mount namespaces
+- Read-only bind mounts for `/usr`, `/lib`, `/lib64`, `/bin`, and the source directory
+- Drops privileges to `uid 1000 / gid 1000`
+- Falls back to `ulimit -v -t` constraints if `bwrap` is unavailable (with a prominent security warning)
+
+</details>
+
+<details>
+<summary><b>Windows — Job Objects + Process Tree Killing</b></summary>
+
+- Attempts `win32-job` native Job Objects for memory capping
+- Falls back to `tasklist` / `taskkill` / WMIC / PowerShell recursive child-PID discovery and termination
+
+</details>
+
+<details>
+<summary><b>Cross-platform safety nets</b></summary>
+
+- **Time limit enforcement** — configurable `setTimeout` with `SIGKILL` on the entire process group/tree
+- **Memory limit enforcement** — 300ms polling loop via `ps -o rss=` (Unix) or `tasklist /FI` (Windows)
+- **5 MB output cap** — prevents stdout flooding from crashing the host → immediate `RE` verdict
+- **Signal handling** — `SIGXCPU` → `TLE`, exit code 137 / `SIGKILL` / OOM → `MLE`, non-zero exit → `RE`
+
+</details>
+
+---
+
+### 🌐 Codeforces Integration
+
+> Browse contests, scrape problems, import samples — all built in.
+
+- **Live contest browser** — fetches from the Codeforces API. Three sections: Active Now (green pulse), Upcoming (with start time), Recent Past
+- **Problem statement viewer** — full HTML rendering with MathJax LaTeX support, time/memory limit chips, input/output format sections
+- **One-click sample import** — push sample test cases from any problem directly into the Judge
+- **"Open To Folder"** — scaffold a contest directory with `A.cpp`, `B.cpp`, … template files in your workspace
+- **Custom fetch** — type a contest ID (`1981`) or problem (`1981A`) and instantly load it
+- **Robust scraper** — 3-tier Cloudflare bypass: saved cookies → real Chrome profile (Playwright stealth) → HTTP login fallback
+
+---
+
+### 📂 Workspace Explorer
+
+- **Recursive file tree** with smart filtering (`node_modules`, `.git`, `.vite` excluded)
+- **Full CRUD** — new file, new folder, rename (inline editing with smart extension selection), delete with confirmation
+- **Context menus** — right-click on files, folders, or empty space for quick actions
+- **Drag & drop** — relocate files and folders within the tree
+- **Pinned files shelf** — bookmark frequently accessed files for instant access
+- **Regex search** — real-time filter with Match Case and Regex toggle buttons
+
+---
+
+### ⌨️ Integrated Terminal
+
+- **xterm.js** frontend with `node-pty` native PTY backend (PowerShell on Windows, bash on Linux/macOS)
+- **Fallback mode** — standard `child_process` shell with manual echo if PTY bindings are unavailable
+- **Auto-resize** — `ResizeObserver`-based fit with dimensions forwarded to the PTY process
+- **Theme-matched** — colors aligned with the editor's monochrome palette
+
+---
+
+### 🪟 UI & Window Chrome
+
+- **Frameless custom title bar** with File / Edit / Selection / View / Terminal / Options / Help menus
+- **Floating glass NavDock** — vertical activity bar with hover-reveal collapse, neon tube active indicator, animated tooltips
+- **Persistent state** — workspace path, judge test cases, UI preferences, and editor settings survive restarts via `electron-store`
+- **Welcome screen** — logo, branding, and keyboard shortcut guide when no files are open
 
 ---
 
 ## 🧱 Tech Stack
 
-| Layer | Technology | Why |
+| Layer | Technology | Purpose |
 |---|---|---|
-| **Shell** | Electron 42 | Mature, custom window chrome, and full desktop OS capabilities |
-| **UI Runtime** | React 19 | Modern, concurrent, and fast rendering |
-| **Language** | TypeScript 6 | Strict type safety across the Electron IPC boundary |
-| **Bundler** | Vite 8 | Lightning-fast HMR and tiny production bundles |
-| **Editor** | `@monaco-editor/react` | The industrial-grade VS Code editor engine |
-| **Terminal** | `xterm.js` + `node-pty` | Authentic terminal shell integration |
+| **Shell** | Electron 42 | Frameless window, native OS APIs, IPC bridge |
+| **UI** | React 19 + Zustand 5 | Concurrent rendering, persisted state management |
+| **Language** | TypeScript 6 | Strict typing across the Electron boundary |
+| **Editor** | Monaco Editor | VS Code's industrial-grade editing engine |
+| **Terminal** | xterm.js + node-pty | Native PTY shell integration |
+| **Bundler** | Vite 8 | Sub-second HMR, optimized production builds |
+| **Scraper** | Cheerio + Playwright | Codeforces problem extraction with Cloudflare bypass |
+| **Unit Tests** | Vitest + Testing Library | Component, store, service, and security tests |
+| **E2E Tests** | Playwright | Full browser workflow automation |
+| **CI/CD** | GitHub Actions | Lint → Typecheck → Unit (70% coverage) → E2E |
 
 ---
 
-## 📦 Run from Source
+## 🚀 Quick Start
 
-**Prerequisites**
-- **Node.js** ≥ 20
-- **npm** ≥ 10
-- **Windows 10/11**
-- *(Optional, for the Judge)* `g++', `java`/`javac`, `python` on your `PATH`
+### Prerequisites
 
-**Clone & Install**
+| Requirement | Version |
+|---|---|
+| Node.js | ≥ 20 |
+| npm | ≥ 10 |
+| OS | Windows 10/11, Linux, macOS |
+| *(for Judge)* | `g++`, `java`/`javac`, `python` on `PATH` |
+
+### Clone & Install
+
 ```bash
 git clone https://github.com/naman/nexel-ide.git
 cd nexel-ide/nexel-ide
 npm install
 ```
 
-**Launch the dev build (Vite + Electron with HMR)**
+### Launch (Vite + Electron with HMR)
+
 ```bash
+# Start the Vite dev server (renderer)
 npm run dev
+
+# In a separate terminal — start Electron (main process)
+npm run electron:dev
+```
+
+### Available Scripts
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | TypeScript compile + Vite production build |
+| `npm run electron:dev` | Launch Vite + Electron concurrently with HMR |
+| `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run `tsc --noEmit` |
+| `npm run test` | Run all Vitest unit/integration tests |
+| `npm run test:coverage` | Run Vitest with v8 coverage (70% threshold) |
+| `npm run test:e2e` | Run Playwright end-to-end tests |
+
+---
+
+## 🏗️ Architecture
+
+```
+nexel-ide/
+├── .github/workflows/ci.yml          # GitHub Actions: lint, test, e2e
+├── nexel-ide/                         # Main Electron + React application
+│   ├── main.cjs                       # Electron main process (IPC handlers, on-the-fly TS compilation)
+│   ├── preload.cjs                    # contextBridge — 23 safe API methods
+│   ├── src/
+│   │   ├── App.tsx                    # Root layout: TitleBar + NavDock + panels + Editor
+│   │   ├── components/
+│   │   │   ├── TitleBar.tsx           # Frameless window chrome + menu bar
+│   │   │   ├── NavDock.tsx            # Floating glass activity bar with hover-reveal
+│   │   │   ├── Explorer.tsx           # Workspace tree, search, pins, drag-drop, CRUD
+│   │   │   ├── Editor.tsx             # Monaco multi-tab editor + split pane + snippets viewer + CF problem viewer
+│   │   │   ├── Terminal.tsx           # xterm.js + node-pty terminal
+│   │   │   ├── JudgeSystem.tsx        # Test case manager, verdict display, diff viewer
+│   │   │   └── ContestsSystem.tsx     # Codeforces contest browser + problem fetcher
+│   │   ├── stores/
+│   │   │   ├── useEditorStore.ts      # Tabs, split state, settings (Zustand + persist)
+│   │   │   ├── useJudgeStore.ts       # Test cases, verdicts (Zustand + persist)
+│   │   │   ├── useUIStore.ts          # Sidebar, terminal, modal state (Zustand + persist)
+│   │   │   ├── useWorkspaceStore.ts   # File tree, pins, search (Zustand + persist)
+│   │   │   └── electronStorage.ts     # Zustand ↔ electron-store bridge with write-cache
+│   │   ├── judge-backend/
+│   │   │   ├── SandboxExecutor.ts     # ISandboxExecutor interface (swap for Docker/WASM)
+│   │   │   └── LocalSandboxExecutor.ts # Bubblewrap (Linux) + Job Objects (Windows) sandbox
+│   │   ├── main/services/
+│   │   │   ├── JudgeService.ts        # Compilation orchestrator + CF API + scraper spawner
+│   │   │   ├── FileSystemService.ts   # File CRUD with path-traversal protection
+│   │   │   ├── FileTreeWorker.ts      # Off-main-thread directory scanner
+│   │   │   └── StoreService.ts        # electron-store wrapper
+│   │   └── __mocks__/                 # Vitest mocks for nexelAPI + setup
+│   ├── tests/e2e/
+│   │   ├── ide-workflow.spec.ts       # E2E: file → edit → judge → AC celebration
+│   │   └── contests-system.spec.ts    # E2E: browse → open contest → load problem
+│   ├── dataset.json                   # 1,600-entry C++ autocomplete dataset
+│   ├── snippets.json                  # 100+ CP snippet templates
+│   ├── vitest.config.ts               # jsdom, React plugin, 70% coverage thresholds
+│   └── playwright.config.ts           # Chromium, Vite webServer, HTML reporter
+└── nexel-judge/                       # Standalone Codeforces scraper
+    ├── cf_problems.js                 # Problem scraper with 3-tier Cloudflare bypass
+    └── get_contests.js                # Contest list fetcher
 ```
 
 ---
 
-## 🗂️ Project Structure
+## 🧪 Testing
+
+Nexel IDE is protected by a multi-layered testing strategy:
+
+### Unit & Integration Tests (Vitest)
+
+| Suite | What it proves |
+|---|---|
+| `LocalSandboxExecutor.security.test.ts` | 5MB output cap kills the process; hung executions get `SIGKILL` → `TLE` |
+| `LocalSandboxExecutor.test.ts` | Multi-language execution, verdict mapping, memory/time measurement |
+| `JudgeService.compilation.test.ts` | Compiler hangs are aborted via `SIGKILL`; temp workspaces are cleaned up |
+| `JudgeService.contests.test.ts` | Contest API parsing; scraper spawns with correct isolated env vars |
+| `FileTreeWorker.resilience.test.ts` | `EACCES` errors are caught gracefully; 500+ file scans don't block the event loop |
+| `electronStorage.integrity.test.ts` | Write-cache deduplication; invalid JSON fallback handling |
+| `useEditorStore.edge-cases.test.ts` | Rapid tab open/close race conditions; dirty state tracking correctness |
+| `JudgeSystem.test.tsx` | Component rendering, verdict display, run button state management |
+
+### End-to-End Tests (Playwright)
+
+| Suite | Workflow |
+|---|---|
+| `ide-workflow.spec.ts` | Open workspace → create file → edit code → run judge → assert AC verdict + celebration glow |
+| `contests-system.spec.ts` | New user (no credentials) → browse contests → open past contest → load problems → open in editor |
+
+### Coverage
 
 ```
-nexel-ide/
-├── main.cjs                   # Electron main process + IPC handlers
-├── preload.cjs                # Safe contextBridge API for the renderer
-├── public/                    # Static assets (favicon, icons)
-├── src/
-│   ├── App.tsx                # Root layout: TitleBar + dock + panels
-│   ├── main.tsx               # React entry point
-│   ├── components/
-│   │   ├── TitleBar.tsx       # Frameless window chrome + menus
-│   │   ├── NavDock.tsx        # Floating glass sidebar with collapse
-│   │   ├── Explorer.tsx       # Workspace file tree + search + pins
-│   │   ├── Editor.tsx         # Monaco-based multi-tab editor
-│   │   ├── Terminal.tsx       # xterm.js + node-pty terminal
-│   │   └── JudgeSystem.tsx    # CP test runner UI
-│   ├── judge-backend/
-│   │   └── judge-runner.cjs   # Local compile/run/verdict engine
-│   └── assets/                # Logo + hero images
-└── package.json
+npm run test:coverage
+```
+
+Enforces **70% minimum** on statements, branches, functions, and lines via `@vitest/coverage-v8`.
+
+---
+
+## 🔄 CI/CD
+
+GitHub Actions runs **three parallel jobs** on every push/PR to `main`:
+
+```
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│  lint-and-typecheck  │    │     unit-tests       │    │      e2e-tests      │
+│                     │    │                     │    │                     │
+│  npm run lint       │    │  npm run             │    │  npx playwright     │
+│  npm run typecheck  │    │    test:coverage     │    │    install --with-  │
+│                     │    │                     │    │    deps             │
+│                     │    │  (70% threshold)    │    │  npm run test:e2e  │
+│                     │    │                     │    │                     │
+│                     │    │                     │    │  📦 Upload report   │
+│                     │    │                     │    │     (30-day)        │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 ```
 
 ---
 
 ## 🧭 Roadmap
 
-### ✅ V1 — Shipped
-- [x] Workspace explorer with recursive scanning and file operations
-- [x] Monaco-based editor with auto-save and tab state management
-- [x] Integrated terminal with native PTY support
-- [x] Local judge system (C++ / Java / Python) with AC/WA gamified animations
-- [x] Telemetry tracking (execution speed and memory overhead)
-- [x] C++ boilerplate template injection
+### ✅ Shipped
 
-### 🚧 V2 — In Progress
-- [ ] Pinned snippet collection panel (Segment Trees, Graphs, Math templates)
-- [ ] Finder overlay (Project-wide search/replace)
-- [ ] Git integration view
+- [x] Monaco editor with custom theme, multi-tab, split pane, auto-save
+- [x] C++ autocomplete engine (1,600+ entries) with `std::` auto-stripping
+- [x] 100+ competitive programming snippet library with searchable viewer
+- [x] Local judge system — C++ / Java / Python with AC/WA/TLE/MLE/RE verdicts
+- [x] Sandboxed execution — Bubblewrap (Linux), Job Objects (Windows), output capping
+- [x] Codeforces integration — contest browser, problem viewer, sample import, folder scaffolding
+- [x] Workspace explorer with CRUD, drag-drop, pins, regex search
+- [x] Integrated terminal with native PTY
+- [x] C++ boilerplate template system
+- [x] Persistent state across restarts
+- [x] Gamified AC celebration glow + WA shake animations
+- [x] Custom frameless window with full menu system
+- [x] CI/CD pipeline — lint, typecheck, unit tests (70% coverage), E2E tests
+- [x] Path-traversal protection on file system operations
+- [x] Off-main-thread file tree scanning
+
+### 🚧 Planned
+
+- [ ] Finder overlay (project-wide search & replace)
+- [ ] Git integration sidebar
+- [ ] Themes marketplace (light mode, custom themes)
+- [ ] Atcoder / USACO contest integration
+- [ ] Docker-based sandbox executor
+- [ ] Collaborative editing (WebRTC)
 
 ---
 
@@ -169,14 +337,10 @@ nexel-ide/
 
 Released under the **MIT License**. See [LICENSE](./LICENSE) for the full text.
 
-```
-MIT — do what you want, just don't sue us.
-```
-
 ---
 
 <div align="center">
 
-**Built with caffeine and stubborness by the Nexel Team** ☕⚡
+<sub>Built with caffeine and stubbornness by the Nexel Team ☕⚡</sub>
 
 </div>

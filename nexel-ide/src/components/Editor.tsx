@@ -1,17 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import './Editor.css';
+import { useEditorStore } from '../stores/useEditorStore';
+import type { EditorTab } from '../stores/useEditorStore';
+import { useJudgeStore } from '../stores/useJudgeStore';
 import logoImg from '../assets/logo.png';
 import dataset from '../../dataset.json';
 import snippets from '../../snippets.json';
-
-interface EditorTab {
-  filePath: string;
-  name: string;
-  content: string;
-  originalContent: string; // Used to track dirty status
-  isDirty: boolean;
-}
 
 interface EditorProps {
   activeFilePath: string | null;
@@ -20,20 +15,31 @@ interface EditorProps {
 }
 
 export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, onCloseFile }) => {
-  const [tabs, setTabs] = useState<EditorTab[]>([]);
-  const [activeTabPath, setActiveTabPath] = useState<string | null>(null);
-  const [autoSave, setAutoSave] = useState<boolean>(false);
+  const {
+    tabs,
+    activeTabPath,
+    focusedTabPath,
+    isSplit,
+    rightTabPath,
+    splitRatio,
+    autoSave,
+    acCelebration,
+    enableSnippets,
+    updateTabContent,
+    toggleSplit,
+    setFocusedTabPath,
+    closeTab,
+    setAutoSave,
+    setSplitRatio,
+    closeAllTabs,
+    closeSavedTabs,
+  } = useEditorStore();
+
   const [showMenu, setShowMenu] = useState<boolean>(false);
-  const [acCelebration, setAcCelebration] = useState<boolean>(false);
-  
-  // Split pane system states
-  const [isSplit, setIsSplit] = useState<boolean>(false);
-  const [rightTabPath, setRightTabPath] = useState<string | null>(null);
-  const [splitRatio, setSplitRatio] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
-  const autoSaveIntervalRef = useRef<any>(null);
+  const autoSaveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const editorRef = useRef<any>(null);
   const completionProviderRef = useRef<any>(null);
 
@@ -51,7 +57,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
       const relativeX = e.clientX - rect.left;
       const percentage = (relativeX / rect.width) * 100;
       
-      // Enforce bounds (min 20%, max 80%) for visual premium feel
       if (percentage > 20 && percentage < 80) {
         setSplitRatio(percentage);
       }
@@ -68,7 +73,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, setSplitRatio]);
 
   // Clean up completion provider on unmount
   useEffect(() => {
@@ -79,121 +84,32 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     };
   }, []);
 
-  // Open Snippets Tab global listener
-  useEffect(() => {
-    const handleOpenSnippets = () => {
-      setTabs(prev => {
-        const existing = prev.find(t => t.filePath === 'nexel://snippets');
-        if (existing) {
-          setActiveTabPath('nexel://snippets');
-          return prev;
-        }
-        const newTab: EditorTab = {
-          filePath: 'nexel://snippets',
-          name: 'Code Snippets',
-          content: '',
-          originalContent: '',
-          isDirty: false
-        };
-        setActiveTabPath('nexel://snippets');
-        return [...prev, newTab];
-      });
-    };
-    window.addEventListener('nx-open-snippets', handleOpenSnippets);
-    return () => window.removeEventListener('nx-open-snippets', handleOpenSnippets);
-  }, []);
-
-  // Open Codeforces Problem Tab global listener
-  useEffect(() => {
-    const handleOpenProblem = (e: Event) => {
-      const customEvent = e as CustomEvent<{ contestId: number; problem: any }>;
-      if (!customEvent.detail || !customEvent.detail.problem) return;
-      const { contestId, problem } = customEvent.detail;
-      const tabPath = `cf://${contestId}/${problem.index}`;
-      const tabName = `CF ${contestId}${problem.index}`;
-
-      setTabs(prev => {
-        const existing = prev.find(t => t.filePath === tabPath);
-        if (existing) {
-          setActiveTabPath(tabPath);
-          return prev;
-        }
-        const newTab: EditorTab = {
-          filePath: tabPath,
-          name: tabName,
-          content: JSON.stringify(problem),
-          originalContent: JSON.stringify(problem),
-          isDirty: false
-        };
-        setActiveTabPath(tabPath);
-        return [...prev, newTab];
-      });
-    };
-    window.addEventListener('nx-open-cf-problem', handleOpenProblem);
-    return () => window.removeEventListener('nx-open-cf-problem', handleOpenProblem);
-  }, []);
-
-  // Listen for AC celebration event to flash green glow wash
-  useEffect(() => {
-    const handleAc = () => {
-      setAcCelebration(true);
-      setTimeout(() => setAcCelebration(false), 1500);
-    };
-    window.addEventListener('nx-ac-celebration', handleAc);
-    return () => window.removeEventListener('nx-ac-celebration', handleAc);
-  }, []);
-
   const toggleSplitTab = (path: string) => {
-    if (isSplit && rightTabPath === path) {
-      setIsSplit(false);
-      setRightTabPath(null);
-    } else {
-      setIsSplit(true);
-      setRightTabPath(path);
-      // Switch active left tab if it matches the one being split to the right
-      if (activeTabPath === path) {
-        const otherTab = tabs.find(t => t.filePath !== path);
-        if (otherTab) {
-          setActiveTabPath(otherTab.filePath);
-          onFileSelect(otherTab.filePath);
-        }
-      }
+    toggleSplit(path);
+    const updatedState = useEditorStore.getState();
+    if (updatedState.activeTabPath) {
+      onFileSelect(updatedState.activeTabPath);
     }
   };
 
-  const closeAllTabs = () => {
+  const handleCloseAllTabs = () => {
     setShowMenu(false);
     const hasDirty = tabs.some(t => t.isDirty);
     if (hasDirty) {
       const confirmClose = window.confirm("Some tabs have unsaved changes. Close all anyway?");
       if (!confirmClose) return;
     }
-    setTabs([]);
-    setActiveTabPath(null);
-    setIsSplit(false);
-    setRightTabPath(null);
+    closeAllTabs();
     if (onCloseFile) onCloseFile("");
   };
 
-  const closeSavedTabs = () => {
+  const handleCloseSavedTabs = () => {
     setShowMenu(false);
-    const remaining = tabs.filter(t => t.isDirty);
-    setTabs(remaining);
-    
-    // Reset split tab if it was among closed tabs
-    if (rightTabPath && !remaining.some(t => t.filePath === rightTabPath)) {
-      setIsSplit(false);
-      setRightTabPath(null);
-    }
-
-    if (remaining.length > 0) {
-      if (!remaining.some(t => t.filePath === activeTabPath)) {
-        const nextActive = remaining[remaining.length - 1].filePath;
-        setActiveTabPath(nextActive);
-        onFileSelect(nextActive);
-      }
+    closeSavedTabs();
+    const updatedState = useEditorStore.getState();
+    if (updatedState.activeTabPath) {
+      onFileSelect(updatedState.activeTabPath);
     } else {
-      setActiveTabPath(null);
       if (onCloseFile) onCloseFile("");
     }
   };
@@ -202,34 +118,24 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   useEffect(() => {
     if (!activeFilePath) return;
 
-    const loadFile = async () => {
-      // Check if already open
-      const existingTab = tabs.find(t => t.filePath === activeFilePath);
-      if (existingTab) {
-        setActiveTabPath(activeFilePath);
-        return;
-      }
+    const existingTab = tabs.find(t => t.filePath === activeFilePath);
+    if (existingTab) {
+      useEditorStore.setState({ activeTabPath: activeFilePath });
+      return;
+    }
 
-      // Load new file content physically
+    const loadFile = async () => {
       try {
         const content = await window.nexelAPI.readFileContent(activeFilePath);
         const name = activeFilePath.split('/').pop() || activeFilePath;
-        const newTab: EditorTab = {
-          filePath: activeFilePath,
-          name,
-          content,
-          originalContent: content,
-          isDirty: false
-        };
-        setTabs(prev => [...prev, newTab]);
-        setActiveTabPath(activeFilePath);
+        useEditorStore.getState().openFile(activeFilePath, name, content);
       } catch (err) {
         console.error("Failed to read selected file:", err);
       }
     };
 
     loadFile();
-  }, [activeFilePath]);
+  }, [activeFilePath, tabs]);
 
   // Handle Ctrl+S and keybinds
   useEffect(() => {
@@ -240,7 +146,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'w') {
         e.preventDefault();
-        if (activeTabPath) closeTab(activeTabPath);
+        if (activeTabPath) handleCloseTab(activeTabPath);
       }
     };
 
@@ -253,7 +159,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     if (autoSave) {
       autoSaveIntervalRef.current = setInterval(() => {
         saveAllDirtyTabs();
-      }, 5000); // Check and save every 5 seconds
+      }, 5000);
     } else {
       if (autoSaveIntervalRef.current) clearInterval(autoSaveIntervalRef.current);
     }
@@ -285,11 +191,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 
     try {
       await window.nexelAPI.writeFileContent(activeTab.filePath, activeTab.content);
-      setTabs(prev => prev.map(t => 
-        t.filePath === activeTabPath 
-          ? { ...t, originalContent: t.content, isDirty: false }
-          : t
-      ));
+      useEditorStore.getState().saveTabSuccess(activeTab.filePath);
     } catch (err) {
       console.error("Failed to save active file:", err);
     }
@@ -300,11 +202,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     for (const tab of dirtyTabs) {
       try {
         await window.nexelAPI.writeFileContent(tab.filePath, tab.content);
-        setTabs(prev => prev.map(t => 
-          t.filePath === tab.filePath 
-            ? { ...t, originalContent: t.content, isDirty: false }
-            : t
-        ));
+        useEditorStore.getState().saveTabSuccess(tab.filePath);
       } catch (err) {
         console.error("Auto-save write operation failed:", err);
       }
@@ -312,39 +210,22 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
   };
 
   const handleEditorChangeForTab = (path: string, value: string | undefined) => {
-    const updatedValue = value || '';
-    setTabs(prev => prev.map(t => 
-      t.filePath === path 
-        ? { ...t, content: updatedValue, isDirty: updatedValue !== t.originalContent }
-        : t
-    ));
+    updateTabContent(path, value || '');
   };
 
-  const closeTab = (path: string) => {
+  const handleCloseTab = (path: string) => {
     const tabToClose = tabs.find(t => t.filePath === path);
     if (tabToClose?.isDirty) {
       const confirmClose = window.confirm(`File "${tabToClose.name}" has unsaved changes. Close anyway?`);
       if (!confirmClose) return;
     }
 
-    if (rightTabPath === path) {
-      setIsSplit(false);
-      setRightTabPath(null);
-    }
-
-    const remainingTabs = tabs.filter(t => t.filePath !== path);
-    setTabs(remainingTabs);
-
+    closeTab(path);
     if (onCloseFile) onCloseFile(path);
 
-    if (activeTabPath === path) {
-      if (remainingTabs.length > 0) {
-        const nextActive = remainingTabs[remainingTabs.length - 1].filePath;
-        setActiveTabPath(nextActive);
-        onFileSelect(nextActive);
-      } else {
-        setActiveTabPath(null);
-      }
+    const updatedState = useEditorStore.getState();
+    if (updatedState.activeTabPath) {
+      onFileSelect(updatedState.activeTabPath);
     }
   };
 
@@ -376,7 +257,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
     }
   };
 
-  // Define Custom Premium Monaco Theme
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
 
@@ -385,13 +265,13 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
       inherit: true,
       rules: [
         { token: 'comment', foreground: '6D727C', fontStyle: 'italic' },
-        { token: 'keyword', foreground: 'C5A3A3', fontStyle: 'bold' }, // Muted grayish red/pink
-        { token: 'string', foreground: 'B0C4DE' }, // Muted grayish blue
-        { token: 'number', foreground: 'D3C1A5' }, // Muted grayish gold
-        { token: 'regexp', foreground: 'C5B0C5' }, // Muted grayish purple
-        { token: 'type', foreground: 'A3C5B5', fontStyle: 'bold' }, // Muted grayish teal/green
-        { token: 'class', foreground: 'D5D6D8', fontStyle: 'bold' }, // Muted off-white
-        { token: 'function', foreground: 'D4C2AD' }, // Muted grayish peach/orange
+        { token: 'keyword', foreground: 'C5A3A3', fontStyle: 'bold' },
+        { token: 'string', foreground: 'B0C4DE' },
+        { token: 'number', foreground: 'D3C1A5' },
+        { token: 'regexp', foreground: 'C5B0C5' },
+        { token: 'type', foreground: 'A3C5B5', fontStyle: 'bold' },
+        { token: 'class', foreground: 'D5D6D8', fontStyle: 'bold' },
+        { token: 'function', foreground: 'D4C2AD' },
         { token: 'variable', foreground: 'E2E3E5' },
         { token: 'identifier', foreground: 'E2E3E5' },
       ],
@@ -410,7 +290,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 
     monaco.editor.setTheme('nexel-minimal-dark');
 
-    // Register C++ autocomplete provider based on dataset.json
     if (completionProviderRef.current) {
       completionProviderRef.current.dispose();
     }
@@ -436,7 +315,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
             let label = item.label;
             let insertText = item.insertText || item.label;
 
-            // Strip std:: if using namespace std
             if (hasUsingStd) {
               if (label.startsWith('std::')) {
                 label = label.substring(5);
@@ -457,7 +335,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
               kind = monaco.languages.CompletionItemKind.Snippet;
             }
 
-            // Order by score: 1000 - score ensures higher scores appear first
             const score = item.score !== undefined ? item.score : 50;
             const sortText = String(1000 - score).padStart(4, '0');
 
@@ -475,22 +352,20 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
           });
         });
 
-        // Inject snippets from snippets.json if enabled
-        const showSnippets = localStorage.getItem('enable-snippets') !== 'false';
-        if (showSnippets) {
-          Object.entries(snippets).forEach(([_key, val]: [string, any]) => {
+        if (enableSnippets) {
+          Object.entries(snippets).forEach(([key, val]: [string, any]) => {
             const bodyStr = Array.isArray(val.body) ? val.body.join('\n') : val.body;
             suggestions.push({
               label: val.prefix,
               kind: monaco.languages.CompletionItemKind.Snippet,
               detail: val.description || 'Snippet',
               documentation: {
-                value: `**${val.description}**\n\n\`\`\`cpp\n${bodyStr}\n\`\`\``
+                value: `**${val.description || key}**\n\n\`\`\`cpp\n${bodyStr}\n\`\`\``
               },
               insertText: bodyStr,
               insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
               range: range,
-              sortText: '0001' // snippet has higher sorting priority
+              sortText: '0001'
             });
           });
         }
@@ -579,7 +454,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 
   return (
     <div ref={containerRef} className={`nx-editor-canvas ${acCelebration ? 'ac-celebrate-glow' : ''}`}>
-      {/* Floating Premium aesthetic minimal active tabs bar */}
+      {/* Floating Premium tabs bar */}
       {tabs.length > 0 && (
         <div className="nx-floating-tabbar-container">
           <div className="nx-floating-tabbar">
@@ -587,10 +462,14 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
               {tabs.map((tab) => (
                 <div 
                   key={tab.filePath} 
-                  className={`nx-editor-tab ${activeTabPath === tab.filePath ? 'active' : ''} ${activeTabPath === tab.filePath && acCelebration ? 'ac-celebrate-glow' : ''}`}
+                  className={`nx-editor-tab ${focusedTabPath === tab.filePath ? 'active' : ''} ${focusedTabPath === tab.filePath && acCelebration ? 'ac-celebrate-glow' : ''}`}
                   onClick={() => {
-                    setActiveTabPath(tab.filePath);
-                    onFileSelect(tab.filePath);
+                    if (isSplit && rightTabPath === tab.filePath) {
+                      setFocusedTabPath(tab.filePath);
+                    } else {
+                      useEditorStore.setState({ activeTabPath: tab.filePath, focusedTabPath: tab.filePath });
+                      onFileSelect(tab.filePath);
+                    }
                   }}
                 >
                   <span className="nx-tab-title">{tab.name}</span>
@@ -614,7 +493,7 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
                       title="Close Tab"
                       onClick={(e) => {
                         e.stopPropagation();
-                        closeTab(tab.filePath);
+                        handleCloseTab(tab.filePath);
                       }}
                     >
                       ×
@@ -638,10 +517,10 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
                   <div className="nx-dropdown-item" onClick={saveAllDirtyTabs}>
                     Save All Tabs
                   </div>
-                  <div className="nx-dropdown-item" onClick={closeAllTabs}>
+                  <div className="nx-dropdown-item" onClick={handleCloseAllTabs}>
                     Close All Tabs
                   </div>
-                  <div className="nx-dropdown-item warning" onClick={closeSavedTabs}>
+                  <div className="nx-dropdown-item warning" onClick={handleCloseSavedTabs}>
                     Close Saved Tabs
                   </div>
                 </div>
@@ -674,12 +553,20 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
         </div>
       )}
 
-      {/* Editor Main Content Area (supports Split Layout) */}
+      {/* Editor Main Content Area */}
       <div className="nx-editor-main-container">
         {isSplit ? (
           <div className="nx-editor-split-container">
             {/* Left Pane */}
-            <div className="nx-editor-split-pane left" style={{ width: `${splitRatio}%` }}>
+            <div 
+              className={`nx-editor-split-pane left ${focusedTabPath === activeTabPath ? 'focused' : ''}`} 
+              style={{ width: `${splitRatio}%` }}
+              onMouseDown={() => {
+                if (activeTabPath && focusedTabPath !== activeTabPath) {
+                  setFocusedTabPath(activeTabPath);
+                }
+              }}
+            >
               {activeTab && activeTab.filePath !== rightTabPath ? (
                 renderTabContent(activeTab)
               ) : (
@@ -696,14 +583,22 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
             </div>
 
             {/* Right Pane */}
-            <div className="nx-editor-split-pane right" style={{ width: `${100 - splitRatio}%` }}>
+            <div 
+              className={`nx-editor-split-pane right ${focusedTabPath === rightTabPath ? 'focused' : ''}`} 
+              style={{ width: `${100 - splitRatio}%` }}
+              onMouseDown={() => {
+                if (rightTabPath && focusedTabPath !== rightTabPath) {
+                  setFocusedTabPath(rightTabPath);
+                }
+              }}
+            >
               {rightTab ? (
                 <div className="nx-right-pane-wrapper">
                   <div className="nx-right-pane-header">
                     <span className="nx-right-pane-title">{rightTab.name}</span>
                     <button 
                       className="nx-right-pane-close" 
-                      onClick={() => { setIsSplit(false); setRightTabPath(null); }} 
+                      onClick={() => { useEditorStore.setState({ isSplit: false, rightTabPath: null, focusedTabPath: activeTabPath }); }} 
                       title="Close Split Pane"
                     >
                       ×
@@ -719,7 +614,6 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
             </div>
           </div>
         ) : (
-          /* Standard Single Pane View */
           activeTab ? renderTabContent(activeTab) : renderWelcomeBackdrop()
         )}
       </div>
@@ -744,14 +638,14 @@ export const Editor: React.FC<EditorProps> = ({ activeFilePath, onFileSelect, on
 export default Editor;
 
 interface SnippetsViewerProps {
-  snippetsData: any;
+  snippetsData: Record<string, { prefix: string; description: string; body: string[] }>;
 }
 
 const SnippetsViewer: React.FC<SnippetsViewerProps> = ({ snippetsData }) => {
   const [search, setSearch] = useState('');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const filteredSnippets = Object.entries(snippetsData).filter(([key, value]: [string, any]) => {
+  const filteredSnippets = Object.entries(snippetsData).filter(([key, value]) => {
     const q = search.toLowerCase();
     return (
       key.toLowerCase().includes(q) ||
@@ -783,7 +677,7 @@ const SnippetsViewer: React.FC<SnippetsViewerProps> = ({ snippetsData }) => {
       </div>
 
       <div className="nx-snippets-grid">
-        {filteredSnippets.map(([key, value]: [string, any]) => (
+        {filteredSnippets.map(([key, value]) => (
           <div key={key} className="nx-snippet-card">
             <div className="nx-snippet-card-header">
               <span className="nx-snippet-prefix-badge" title="Type prefix and press Tab to expand">{value.prefix}</span>
@@ -809,7 +703,18 @@ const SnippetsViewer: React.FC<SnippetsViewerProps> = ({ snippetsData }) => {
 };
 
 interface ContestProblemViewerProps {
-  problemData: any;
+  problemData: {
+    url: string;
+    index: string;
+    title: string;
+    timeLimit: string;
+    memoryLimit: string;
+    statement?: string;
+    inputFormat?: string;
+    outputFormat?: string;
+    note?: string;
+    testCases?: Array<{ input: string; output: string }>;
+  };
 }
 
 const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ problemData }) => {
@@ -822,7 +727,7 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
 
   const handleImportSamples = () => {
     if (problemData.testCases && Array.isArray(problemData.testCases)) {
-      window.dispatchEvent(new CustomEvent('nx-import-samples', { detail: problemData.testCases }));
+      useJudgeStore.getState().importSamples(problemData.testCases);
       alert("Sample test cases successfully imported to Nexel Judge System! Switch to the Judge tab to run them.");
     }
   };
@@ -850,14 +755,12 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
       </div>
 
       <div className="nx-cf-problem-body">
-        {/* Description Statement */}
         {problemData.statement && (
           <div className="nx-cf-section statement-section">
             <div dangerouslySetInnerHTML={{ __html: problemData.statement }} />
           </div>
         )}
 
-        {/* Input format */}
         {problemData.inputFormat && (
           <div className="nx-cf-section">
             <h3 className="nx-cf-section-title">Input</h3>
@@ -865,7 +768,6 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
           </div>
         )}
 
-        {/* Output format */}
         {problemData.outputFormat && (
           <div className="nx-cf-section">
             <h3 className="nx-cf-section-title">Output</h3>
@@ -873,12 +775,11 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
           </div>
         )}
 
-        {/* Sample Tests */}
         {problemData.testCases && problemData.testCases.length > 0 && (
           <div className="nx-cf-section">
             <h3 className="nx-cf-section-title">Sample Tests</h3>
             <div className="nx-cf-samples-stack">
-              {problemData.testCases.map((tc: any, idx: number) => (
+              {problemData.testCases.map((tc, idx) => (
                 <div key={idx} className="nx-cf-sample-box">
                   <div className="nx-cf-sample-header">
                     <span className="nx-sample-num">Example #{idx + 1}</span>
@@ -919,7 +820,6 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
           </div>
         )}
 
-        {/* Note */}
         {problemData.note && (
           <div className="nx-cf-section note-section">
             <h3 className="nx-cf-section-title">Note</h3>
@@ -930,4 +830,3 @@ const ContestProblemViewer: React.FC<ContestProblemViewerProps> = React.memo(({ 
     </div>
   );
 }, (prev, next) => prev.problemData.url === next.problemData.url);
-

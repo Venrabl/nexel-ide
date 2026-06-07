@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useUIStore } from '../stores/useUIStore';
+import { useWorkspaceStore } from '../stores/useWorkspaceStore';
+import { useEditorStore } from '../stores/useEditorStore';
 import logoImg from '../assets/logo.png';
 import './TitleBar.css';
 
 export const TitleBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [enableSnippets, setEnableSnippets] = useState<boolean>(() => localStorage.getItem('enable-snippets') !== 'false');
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const { toggleSidebar, toggleTerminal, setTerminalVisible, openTemplateModal } = useUIStore();
+  const { openWorkspaceDir, triggerHeaderNewFile, triggerHeaderNewFolder } = useWorkspaceStore();
+  const { enableSnippets, setEnableSnippets, openSnippets } = useEditorStore();
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -26,14 +32,14 @@ export const TitleBar: React.FC = () => {
 
   const triggerOpenFolder = () => {
     setActiveMenu(null);
-    window.dispatchEvent(new CustomEvent('nx-open-folder'));
+    openWorkspaceDir();
   };
 
   const menus = {
     File: [
       { label: 'Open Folder...', action: triggerOpenFolder },
-      { label: 'New File', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-new-file')); } },
-      { label: 'New Folder', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-new-folder')); } },
+      { label: 'New File', action: () => { setActiveMenu(null); triggerHeaderNewFile(); } },
+      { label: 'New Folder', action: () => { setActiveMenu(null); triggerHeaderNewFolder(); } },
     ],
     Edit: [
       { label: 'Undo', action: () => {} },
@@ -47,16 +53,16 @@ export const TitleBar: React.FC = () => {
       { label: 'Expand Selection', action: () => {} },
     ],
     View: [
-      { label: 'Toggle Sidebar', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-toggle-sidebar')); } },
+      { label: 'Toggle Sidebar', action: () => { setActiveMenu(null); toggleSidebar(); } },
       { label: 'Appearance', action: () => {} },
     ],
     Terminal: [
-      { label: 'New Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-terminal')); } },
-      { label: 'Toggle Terminal', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-toggle-terminal')); } },
+      { label: 'New Terminal', action: () => { setActiveMenu(null); setTerminalVisible(true); } },
+      { label: 'Toggle Terminal', action: () => { setActiveMenu(null); toggleTerminal(); } },
     ],
     Options: [
-      { label: 'C++ Template...', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-template-settings')); } },
-      { label: 'Snippets Manager...', action: () => { setActiveMenu(null); window.dispatchEvent(new CustomEvent('nx-open-snippets')); } }
+      { label: 'C++ Template...', action: () => { setActiveMenu(null); openTemplateModal(true); } },
+      { label: 'Snippets Manager...', action: () => { setActiveMenu(null); openSnippets(); } }
     ],
     Help: [
       { label: 'About Nexel IDE', action: () => alert('Nexel IDE v1.0.0 - Built with React + TypeScript + Monaco') },
@@ -124,10 +130,7 @@ export const TitleBar: React.FC = () => {
           <div 
             className={`nx-titlebar-switch-track ${enableSnippets ? 'active' : ''}`}
             onClick={() => {
-              const nextState = !enableSnippets;
-              setEnableSnippets(nextState);
-              localStorage.setItem('enable-snippets', String(nextState));
-              window.dispatchEvent(new CustomEvent('nx-snippets-toggled', { detail: nextState }));
+              setEnableSnippets(!enableSnippets);
             }}
           >
             <div className="nx-titlebar-switch-thumb" />
@@ -137,9 +140,7 @@ export const TitleBar: React.FC = () => {
         {/* Snippets List Button */}
         <button 
           className="nx-titlebar-snippets-btn" 
-          onClick={() => {
-            window.dispatchEvent(new CustomEvent('nx-open-snippets'));
-          }}
+          onClick={openSnippets}
           title="Show Available Snippets List"
         >
           Snippets List

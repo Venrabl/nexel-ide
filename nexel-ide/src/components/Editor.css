@@ -1118,3 +1118,8 @@
   height: calc(100% - 32px);
   overflow: hidden;
 }
+
+.nx-editor-split-pane.focused {
+  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}

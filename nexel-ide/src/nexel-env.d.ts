@@ -5,6 +5,22 @@ export interface IFileNode {
   children?: IFileNode[]; // Recursive: folders can have more files/folders inside
 }
 
+export interface IContest {
+  id: number;
+  name: string;
+  type: string;
+  phase: 'BEFORE' | 'CODING' | 'FINISHED' | 'PENDING_SYSTEM_TEST' | 'SYSTEM_TEST';
+  durationSeconds: number;
+  startTimeSeconds: number;
+  relativeTimeSeconds?: number;
+}
+
+export interface ICategorizedContests {
+  active: IContest[];
+  upcoming: IContest[];
+  passed: IContest[];
+}
+
 export interface INexelAPI {
   minimizeWindow: () => void;
   maximizeWindow: () => void;
@@ -37,14 +53,13 @@ export interface INexelAPI {
   }>>;
   fetchContests: (
     workspaceDir?: string | null
-  ) => Promise<{
-    active: any[];
-    upcoming: any[];
-    passed: any[];
-  }>;
+  ) => Promise<ICategorizedContests>;
   fetchContestProblems: (
     contestId: number | string
-  ) => Promise<any>;
+  ) => Promise<Record<string, unknown>>;
+  getStoreSync: (key: string) => any;
+  setStoreSync: (key: string, value: any) => void;
+  deleteStoreSync: (key: string) => void;
 }
 
 declare global {

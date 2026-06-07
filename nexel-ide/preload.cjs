@@ -33,5 +33,10 @@ contextBridge.exposeInMainWorld('nexelAPI', {
   fetchContests: (workspaceDir) =>
     ipcRenderer.invoke('judge:fetch-contests', workspaceDir),
   fetchContestProblems: (contestId) =>
-    ipcRenderer.invoke('judge:fetch-problems', contestId)
+    ipcRenderer.invoke('judge:fetch-problems', contestId),
+
+  // Secure Electron Store bindings
+  getStoreSync: (key) => ipcRenderer.sendSync('store:get-sync', key),
+  setStoreSync: (key, value) => ipcRenderer.sendSync('store:set-sync', key, value),
+  deleteStoreSync: (key) => ipcRenderer.sendSync('store:delete-sync', key)
 });

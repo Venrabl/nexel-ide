@@ -1,89 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useJudgeStore } from '../stores/useJudgeStore';
+import { useEditorStore } from '../stores/useEditorStore';
 import './JudgeSystem.css';
-
-interface TestCase {
-  id: number;
-  name: string;
-  input: string;
-  expected: string;
-  actual: string;
-  verdict?: 'AC' | 'WA' | 'TLE' | 'MLE' | 'RE' | 'RUNNING' | 'IDLE';
-  time?: number;
-  memory?: number;
-  exitCode?: number | null;
-  errorMsg?: string;
-}
 
 interface JudgeSystemProps {
   activeFilePath?: string | null;
 }
 
 export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
-  const [testCases, setTestCases] = useState<TestCase[]>([
-    { id: 1, name: 'TC 1', input: '', expected: '', actual: '', verdict: 'IDLE' },
-  ]);
-  const [activeTCId, setActiveTCId] = useState<number>(1);
-  const [activeTab, setActiveTab] = useState<'input' | 'expected' | 'actual' | 'diff'>('input');
-  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const {
+    testCases,
+    activeTCId,
+    activeTab,
+    isRunning,
+    addTestCase,
+    deleteTestCase,
+    updateTestCase,
+    setActiveTCId,
+    setActiveTab,
+    setRunning,
+  } = useJudgeStore();
+
   const [showAcEffect, setShowAcEffect] = useState<boolean>(false);
   const [showWaEffect, setShowWaEffect] = useState<boolean>(false);
 
-  useEffect(() => {
-    const handleImport = (e: Event) => {
-      const customEvent = e as CustomEvent<Array<{ input: string; output: string }>>;
-      if (customEvent.detail && Array.isArray(customEvent.detail)) {
-        const mapped = customEvent.detail.map((tc, idx) => ({
-          id: idx + 1,
-          name: `TC ${idx + 1}`,
-          input: tc.input,
-          expected: tc.output,
-          actual: '',
-          verdict: 'IDLE' as const
-        }));
-        setTestCases(mapped);
-        setActiveTCId(1);
-        setActiveTab('input');
-      }
-    };
-    window.addEventListener('nx-import-samples', handleImport);
-    return () => window.removeEventListener('nx-import-samples', handleImport);
-  }, []);
-
   const activeTC = testCases.find(tc => tc.id === activeTCId) || testCases[0];
-
-  const handleAddTestCase = () => {
-    const nextId = testCases.length > 0 ? Math.max(...testCases.map(tc => tc.id)) + 1 : 1;
-    const newTC: TestCase = {
-      id: nextId,
-      name: `TC ${nextId}`,
-      input: '',
-      expected: '',
-      actual: '',
-      verdict: 'IDLE'
-    };
-    setTestCases([...testCases, newTC]);
-    setActiveTCId(nextId);
-  };
 
   const handleDeleteTestCase = (e: React.MouseEvent, idToDelete: number) => {
     e.stopPropagation();
-    if (testCases.length <= 1) {
-      alert("At least one testcase must remain.");
-      return;
-    }
-    const updated = testCases.filter(tc => tc.id !== idToDelete);
-    setTestCases(updated);
-    if (activeTCId === idToDelete) {
-      setActiveTCId(updated[0].id);
-    }
+    deleteTestCase(idToDelete);
   };
 
   const handleTextChange = (value: string) => {
-    setTestCases(prev => prev.map(tc => 
-      tc.id === activeTCId 
-        ? { ...tc, [activeTab]: value }
-        : tc
-    ));
+    // Only allow updating input and expected. actual is read-only.
+    if (activeTab === 'input' || activeTab === 'expected') {
+      updateTestCase(activeTCId, { [activeTab]: value });
+    }
   };
 
   const handleRun = async () => {
@@ -92,63 +44,66 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
       return;
     }
 
-    setIsRunning(true);
+    setRunning(true);
     
     // Set all testcases to RUNNING state for visual cue animations
-    setTestCases(prev => prev.map(tc => ({ ...tc, verdict: 'RUNNING', actual: '' })));
+    useJudgeStore.setState({
+      testCases: testCases.map(tc => ({ ...tc, verdict: 'RUNNING', actual: '' }))
+    });
 
     try {
-      // Map to safe backend array payload
       const payload = testCases.map(tc => ({
         id: tc.id,
         input: tc.input,
         expected: tc.expected
       }));
 
-      // Call high-precision local sandbox judge engine
       const results = await window.nexelAPI.runJudge(activeFilePath, payload, 2000, 256);
 
-      setTestCases(prev => prev.map(tc => {
-        const res = results.find(r => r.id === tc.id);
-        if (res) {
-          return {
-            ...tc,
-            verdict: res.verdict,
-            actual: res.actual,
-            time: res.metrics.time,
-            memory: res.metrics.memory,
-            exitCode: res.metrics.exitCode,
-            errorMsg: res.diff
-          };
-        }
-        return tc;
-      }));
+      useJudgeStore.setState({
+        testCases: testCases.map(tc => {
+          const res = results.find(r => r.id === tc.id);
+          if (res) {
+            return {
+              ...tc,
+              verdict: res.verdict,
+              actual: res.actual,
+              time: res.metrics.time,
+              memory: res.metrics.memory,
+              exitCode: res.metrics.exitCode,
+              errorMsg: res.diff
+            };
+          }
+          return tc;
+        })
+      });
 
-      // Check results for AC / WA to trigger celebrations
       const allAc = results.length > 0 && results.every(r => r.verdict === 'AC');
       const anyWa = results.some(r => r.verdict === 'WA' || r.verdict === 'TLE' || r.verdict === 'MLE' || r.verdict === 'RE');
 
       if (allAc) {
         setShowAcEffect(true);
-        window.dispatchEvent(new CustomEvent('nx-ac-celebration'));
+        useEditorStore.getState().triggerAcCelebration();
         setTimeout(() => setShowAcEffect(false), 1500);
       } else if (anyWa) {
         setShowWaEffect(true);
         setTimeout(() => setShowWaEffect(false), 800);
       }
 
-      // Auto-switch to actual output tab to display results
       setActiveTab('actual');
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setTestCases(prev => prev.map(tc => ({
-        ...tc,
-        verdict: 'RE',
-        actual: err.message || 'Execution error'
-      })));
+      const message = err instanceof Error ? err.message : String(err);
+      useJudgeStore.setState({
+        testCases: testCases.map(tc => ({
+          ...tc,
+          verdict: 'RE',
+          actual: message || 'Execution error'
+        }))
+      });
     } finally {
-      setIsRunning(false);
+      setRunning(false);
     }
   };
 
@@ -169,7 +124,6 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
         <span className="nx-judge-title">NEXEL JUDGE</span>
       </div>
 
-      {/* Dynamic Testcase Pills Slider */}
       <div className="nx-judge-tcs-shelf">
         <div className="nx-judge-tcs-scroll">
           {testCases.map((tc) => {
@@ -204,7 +158,7 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
           <button 
             className="nx-tc-add-btn" 
             title="Add Testcase"
-            onClick={handleAddTestCase}
+            onClick={addTestCase}
             disabled={isRunning}
           >
             +
@@ -212,7 +166,6 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
         </div>
       </div>
 
-      {/* Tabs Section: Input, Expected Output, Actual Output, Diff */}
       <div className="nx-judge-tabs">
         {([
           { key: 'input', label: 'Input' },
@@ -233,7 +186,6 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
         })}
       </div>
 
-      {/* Viewport content based on selected tab */}
       <div className="nx-judge-textbox-container">
         {activeTab === 'diff' ? (
           <div className="nx-judge-diff-viewer">
@@ -287,7 +239,6 @@ export const JudgeSystem: React.FC<JudgeSystemProps> = ({ activeFilePath }) => {
         )}
       </div>
 
-      {/* Run Section: Masterpiece Run Button & Execution Metrics side-by-side */}
       <div className="nx-judge-run-footer">
         <button 
           className={`nx-judge-run-btn ${isRunning ? 'running' : ''}`}
